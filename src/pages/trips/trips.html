@@ -1,0 +1,19 @@
+<!--
+  Generated template for the TripsPage page.
+
+  See http://ionicframework.com/docs/components/#navigation for more info on
+  Ionic pages and navigation.
+-->
+<app-toolbar [title]="'TRIPS.TITLE'|translate"></app-toolbar>
+
+
+<ion-content padding>
+  <ion-list>
+
+    <ion-item *ngFor="let user of data | async  | select:'users'"
+              routerLink="/trip/1">
+      {{ user.firstName }} {{ user.lastName }}
+    </ion-item>
+
+  </ion-list>
+</ion-content>

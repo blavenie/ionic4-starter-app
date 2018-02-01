@@ -1,0 +1,18 @@
+{
+  "APP_NAME": "SUMARiS",
+  "COMMON": {
+    "BTN_CANCEL": "Cancel"
+  },
+  "HOME": {
+    "TITLE": "SUMARiS home"
+  },
+  "AUTH": {
+    "TITLE": "Authentication"
+  },
+  "TRIPS": {
+    "TITLE": "Fishing trips"
+  },
+  "TRIP": {
+    "TITLE": "Fishing trip"
+  }
+}
