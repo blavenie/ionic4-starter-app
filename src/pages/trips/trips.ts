@@ -1,15 +1,22 @@
-import {Component, OnInit} from '@angular/core';
-import {Router, ActivatedRoute, CanActivate, ActivatedRouteSnapshot, RouterStateSnapshot} from "@angular/router";
-import gql from 'graphql-tag';
-import {Observable} from "rxjs";
+import {Component, EventEmitter, Injectable, OnInit, Output, ViewChild} from "@angular/core";
+import gql from "graphql-tag";
 import {Apollo} from "apollo-angular";
+import {MatPaginator, MatSort} from "@angular/material";
+import {merge} from "rxjs/observable/merge";
+import {of as observableOf} from "rxjs/observable/of";
+import {catchError} from "rxjs/operators/catchError";
+import {map} from "rxjs/operators/map";
+import {startWith} from "rxjs/operators/startWith";
+import {switchMap} from "rxjs/operators/switchMap";
+import {TableDataSource, ValidatorService} from "angular4-material-table";
+import {UserValidatorService} from "./validator/validators";
+import {FormControl, FormGroup, Validators} from "@angular/forms";
 
 const Users = gql`
   query {
-    users{
+    users(name: "Bob"){
       id
-      firstName
-      lastName
+      name
     }
   }
 `;
@@ -19,35 +26,75 @@ const Users = gql`
  * See https://ionicframework.com/docs/components/#navigation for more info on
  * Ionic pages and navigation.
  */
+class User {
+  name: string;
+  id: number;
+}
 
 @Component({
   selector: 'page-trips',
   templateUrl: 'trips.html',
+  providers: [
+    {provide: ValidatorService, useClass: UserValidatorService }
+  ],
 })
-export class TripsPage implements CanActivate, OnInit{
+export class TripsPage implements OnInit{
 
-  loading: boolean;
-  data: Observable<any>;
+  displayedColumns = ['firstName', 'lastName', 'actionsColumn'];
+  dataSource:TableDataSource<User>;
+  resultsLength = 0;
+  isLoadingResults = true;
+  isRateLimitReached = false;
 
-  constructor(private route: ActivatedRoute,
-              private router: Router,
-              private apollo: Apollo) {
-    this.loading = true;
-  }
+  @ViewChild(MatPaginator) paginator: MatPaginator;
+  @ViewChild(MatSort) sort: MatSort;
+
+  @Output()
+  listChange = new EventEmitter<User[]>();
+
+  constructor(private apollo: Apollo,
+              private userValidatorService: UserValidatorService) {
+  };
+
 
   ngOnInit() {
-    this.data = this.apollo.watchQuery({ query: Users })
-      .valueChanges;
 
-    this.data.subscribe(({data}) => {
-      this.loading = data.loading;
-    });
+    // If the user changes the sort order, reset back to the first page.
+    this.sort.sortChange.subscribe(() => this.paginator.pageIndex = 0);
+
+    merge(this.sort.sortChange,
+        this.paginator.page)
+      .pipe(
+        startWith({}),
+        switchMap(() => {
+          this.isLoadingResults = true;
+          console.log('sort: ', this.sort.active, this.sort.direction);
+          //this.sort.active, this.sort.direction, this.paginator.pageIndex
+
+          return this.apollo.watchQuery({ query: Users })
+            .valueChanges;
+        }),
+        map(({data})=> {
+          // Flip flag to show that loading has finished.
+          this.isLoadingResults = false;
+          this.isRateLimitReached = data.users.length < this.paginator.pageSize;
+          this.resultsLength = this.paginator.pageIndex * this.paginator.pageSize + data.users.length;
+
+          return data.users;
+        }),
+        catchError((err) => {
+          console.error(err);
+          this.isLoadingResults = false;
+          // Catch if the GitHub API has reached its rate limit. Return empty data.
+          this.isRateLimitReached = true;
+          this.resultsLength = 0;
+          return observableOf([]);
+        })
+      ).subscribe(data => {
+        this.dataSource = new TableDataSource<any>(data, User, this.userValidatorService);
+        this.dataSource.datasourceSubject.subscribe(data => this.listChange.emit(data));
+      });
   }
 
-  canActivate(  next: ActivatedRouteSnapshot,state: RouterStateSnapshot): Observable<boolean> | Promise<boolean> | boolean
-  {
-    alert("Unauthorized Access,Redirecting to Home");
-    this.router.navigate(['']);  // redirect to home
-    return false;
-  }
 }
+

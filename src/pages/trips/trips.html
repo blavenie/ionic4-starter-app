@@ -7,13 +7,79 @@
 <app-toolbar [title]="'TRIPS.TITLE'|translate"></app-toolbar>
 
 
-<ion-content padding>
-  <ion-list>
+<ion-content padding class="no-padding-xs">
+  <!--<ion-list>
 
     <ion-item *ngFor="let user of data | async  | select:'users'"
               routerLink="/trip/1">
       {{ user.firstName }} {{ user.lastName }}
     </ion-item>
 
-  </ion-list>
+  </ion-list>-->
+
+  <!--<ngx-datatable
+    class="material striped"
+    [rows]="data | async | select:'users'"
+    [columns]="columns"
+    [columnMode]="'force'"
+    [headerHeight]="50"
+    [footerHeight]="50"
+    [rowHeight]="50">
+  </ngx-datatable>-->
+  <mat-table #table [dataSource]="dataSource" class="trips-table"
+             matSort matSortActive="firstName" matSortDisableClear matSortDirection="asc">
+
+    <!--- Note that these columns can be defined in any order.
+          The actual rendered columns are set as a property on the row definition" -->
+
+    <!-- Number Column
+    <ng-container matColumnDef="number">
+      <mat-header-cell *matHeaderCellDef>#</mat-header-cell>
+      <mat-cell *matCellDef="let row">{{ row.number }}</mat-cell>
+    </ng-container>-->
+
+    <!-- firstName Column -->
+    <ng-container matColumnDef="firstName">
+      <mat-header-cell *matHeaderCellDef>First Name</mat-header-cell>
+      <mat-cell *matCellDef="let row">
+        <mat-form-field floatPlaceholder="never">
+          <input [formControl]="row.validator.controls['name']" [readonly]="!row.editing" [(ngModel)]="row.currentData.name" matInput>
+        </mat-form-field>
+      </mat-cell>
+    </ng-container>
+
+    <!-- lastName Column -->
+    <ng-container matColumnDef="lastName">
+      <mat-header-cell *matHeaderCellDef>Last Name</mat-header-cell>
+      <mat-cell *matCellDef="let row">
+        <mat-form-field floatPlaceholder="never">
+          <input [formControl]="row.validator.controls['id']" type="number" [(ngModel)]="row.currentData.id" matInput>
+        </mat-form-field>
+      </mat-cell>
+    </ng-container>
+
+    <!-- Edit buttons -->
+    <ng-container matColumnDef="actionsColumn">
+      <mat-header-cell *matHeaderCellDef>
+        <button mat-icon-button color="accent" (click)="dataSource.createNew()"><i class="fa fa-plus icon ion-plus"></i>ADD</button>
+      </mat-header-cell>
+      <mat-cell *matCellDef="let row">
+        <button *ngIf="!row.editing" mat-icon-button color="primary" focusable="false" (click)="row.startEdit()">
+          <i class="fa fa-pencil icon ion-edit"></i>PENCIL
+        </button>
+        <button *ngIf="row.editing" mat-icon-button color="primary" focusable="false" (click)="row.confirmEditCreate()">
+          <i class="fa fa-check icon mat-icon"></i>CHECK
+        </button>
+        <button mat-icon-button color="primary" focusable="false" (click)="row.cancelOrDelete()">
+          <i class="fa fa-times mat-icon"></i>{{ row.editing ? 'cancel' : 'delete'}}
+        </button>
+      </mat-cell>
+    </ng-container>
+
+    <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+    <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
+  </mat-table>
+
+  <mat-paginator [length]="resultsLength" [pageSize]="30">
+  </mat-paginator>
 </ion-content>

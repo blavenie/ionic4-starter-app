@@ -22,6 +22,7 @@ import { TranslateHttpLoader} from '@ngx-translate/http-loader';
 
 // Components
 import {ToolbarComponent} from "./toolbar/toolbar";
+import {AppMaterialModule} from "./material/material.module";
 
 // Auth
 import {AuthGuard} from "../services/auth-guard";
@@ -34,7 +35,8 @@ import { HomePage } from '../pages/home/home';
 import { TripPage } from '../pages/trip/trip';
 import {TripsPage} from "../pages/trips/trips";
 import {WalletService} from "../services/wallet-service";
-
+import {UserValidatorService} from "../pages/trips/validator/validators";
+import {TableDataSource} from "angular4-material-table";
 
 export function createTranslateLoader(http: HttpClient) {
   return new TranslateHttpLoader(http, './assets/i18n/', '.json');
@@ -85,7 +87,8 @@ const routes: Routes = [
         deps: [HttpClient]
       }
     }),
-    RouterModule.forRoot(routes)
+    RouterModule.forRoot(routes),
+    AppMaterialModule
   ],
   bootstrap: [IonicApp],
   entryComponents: [
@@ -104,7 +107,8 @@ const routes: Routes = [
     AuthGuard,
     {provide: APP_BASE_HREF, useValue: '/#/'},
     {provide: ErrorHandler, useClass: IonicErrorHandler},
-    WalletService
+    WalletService,
+    UserValidatorService
   ]
 })
 export class AppModule {
