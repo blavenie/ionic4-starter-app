@@ -15,17 +15,17 @@ import {Router, ActivatedRoute} from "@angular/router";
 })
 export class TripPage implements OnInit{
 
-
   constructor(private route: ActivatedRoute, private router: Router) {
     this.route.params.subscribe(res => console.log(res));
+
   }
 
   ngOnInit() {
-    console.log('ngOnInit TripPage');
+    console.debug('[trip] init page');
   }
 
   ionViewDidLoad() {
-    console.log('ionViewDidLoad TripPage');
+    console.debug('[trip] page loaded');
   }
 
 }

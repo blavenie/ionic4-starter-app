@@ -23,6 +23,32 @@ router-outlet + * {
   width: 100%;
 }
 
+body {
+  user-select: text !important;
+}
+
+#logo {
+  /*
+  display: inline;
+  height: 46px;
+  position: relative;
+  top: 9px;
+  right: 3px;
+  */
+}
+
+#logo + span {
+  line-height: 45px;
+}
+
+
+.bg-image-cover {
+  -webkit-background-size: cover;
+  -moz-background-size: cover;
+  -o-background-size: cover;
+  background-size: cover;
+}
+
 @media (min-width: 768px) {
 
   .header-main {
@@ -55,7 +81,7 @@ ion-menu .no-profile-header .scroll-content{
   margin-top:56px !important;
 }
 ion-menu .has-profile-header .scroll-content{
-  margin-top:147px !important;
+  margin-top:200px !important;
 }
 
 

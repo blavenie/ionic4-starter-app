@@ -1,6 +1,6 @@
 import knex from 'knex';
 import {promisify} from 'bluebird';
-import {createTables, insertUsers, insertMessages} from './methods';
+import {createTables, insertPersons, insertTrips} from './methods';
 
 let {log} = console;
 
@@ -13,9 +13,9 @@ const db = knex({
 
 async function initialize(){
   await createTables(db);
-  await insertUsers(db);
-  await insertMessages(db);
-  return db.select('created_at', 'text').from('messages')
+  await insertPersons(db);
+  await insertTrips(db);
+  return db.select('comments').from('trips')
     .then((rows) => log(rows));
 }
 

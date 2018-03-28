@@ -16,12 +16,13 @@ export interface MenuItem {
 }
 
 @Component({
-  templateUrl: 'app.component.html'
+  templateUrl: 'app.html'
 })
 export class MyApp {
 
   @ViewChild(Nav) nav: Nav;
   isLogin: boolean = false;
+  user: any;
   appMenuItems: Array<MenuItem>;
 
   constructor(platform: Platform, statusBar: StatusBar, splashScreen: SplashScreen, keyboard: Keyboard,
@@ -47,24 +48,27 @@ export class MyApp {
     });
 
     this.appMenuItems = [
-      {title: 'Home', path: '', icon: 'home'},
-      {title: 'Trips', path: 'trips', icon: 'home'}
+      {title: 'MENU.HOME', path: '/', icon: 'home'},
+      {title: 'MENU.TRIPS', path: '/trips', icon: 'pin'}
     ];
 
   }
 
   onLogin(data): void {
     console.log(data);
+    this.user = data;
     this.isLogin = true;
   }
 
   onLogout(): void {
     console.log("[app] logout");
     this.isLogin = false;
+    this.user = null;
     this.router.navigate(['']);
   }
 
   logout(): void {
+    this.user = null;
     this.wallet.logout();
   }
 

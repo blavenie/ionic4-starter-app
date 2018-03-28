@@ -15,7 +15,7 @@ app.use('/graphql', cors(), graphqlHTTP({
   graphiql: true
 }));
 
-const server = app.listen(4000, () => {
+const server = app.listen(7777, () => {
   let { address, port } = server.address();
   log(`graphql server listening at ${address} on port ${port}`);
 });

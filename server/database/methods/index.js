@@ -1,3 +1,3 @@
 export const createTables = require('./createTables');
-export const insertMessages = require('./insertMessages');
-export const insertUsers = require('./insertUsers');
+export const insertPersons = require('./insertPersons');
+export const insertTrips = require('./insertTrips');

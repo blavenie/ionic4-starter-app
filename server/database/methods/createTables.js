@@ -1,15 +1,16 @@
 export default async function createTables(db) {
   try {
-    await db.schema.createTable('users', function (table) {
+    await db.schema.createTable('persons', function (table) {
       table.increments().primary();
-      table.string('name');
+      table.string('firstName');
+      table.string('lastName');
     });
 
-    await db.schema.createTable('messages', function (table) {
+    await db.schema.createTable('trips', function (table) {
       table.increments().primary();
-      table.timestamp('created_at')
-      table.string('text');
-      table.integer('user_id').references('id').inTable('users')
+      table.string('departureDateTime');
+      table.string('returnDateTime');
+      table.string('comments');
     });
 
   } catch(e){

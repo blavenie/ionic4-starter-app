@@ -1,23 +1,41 @@
-import {GraphQLObjectType, GraphQLString, GraphQLList} from 'graphql';
-import {userType} from './types';
-import {resolveUsers} from './resolver';
+import {GraphQLObjectType, GraphQLString, GraphQLList, GraphQLInt} from 'graphql';
+import {personType, tripType} from './types';
+import {resolvePersons, resolveTrips} from './resolver';
 
 const Query = new GraphQLObjectType({
   name: 'RootQueryType',
   fields: {
-    hello: {
-      type: GraphQLString,
-      resolve: () => 'world'
-    },
-    users: {
-      type: new GraphQLList(userType),
+    persons: {
+      type: new GraphQLList(personType),
       args: {
-        name: {
-          name: 'name',
+        lastName: {
+          name: 'lastName',
           type: GraphQLString
         }
       },
-      resolve: resolveUsers
+      resolve: resolvePersons
+    },
+    trips: {
+      type: new GraphQLList(tripType),
+      args: {
+        offset: {
+          name: 'offset',
+          type: GraphQLInt
+        },
+        size: {
+          name: 'size',
+          type: GraphQLInt
+        },
+        sortBy: {
+          name: 'sortBy',
+          type: GraphQLString
+        },
+        sortDirection: {
+          name: 'sortDirection',
+          type: GraphQLString
+        }
+      },
+      resolve: resolveTrips
     }
   }
 });

@@ -1,6 +1,20 @@
-<app-toolbar [title]="'HOME.TITLE'|translate"></app-toolbar>
+<!--<ion-toolbar></ion-toolbar>-->
 
-<ion-content padding>
+<ion-content padding
+             class="bg-image-cover center"
+             [ngStyle]="{'background-image': 'url('+bgImage+')'}">
 
-  Welcome to Ionic App
+  <div class="logo"></div>
+
+  <p class="hidden-xs">&nbsp;</p>
+
+  <div class="center padding light-bg" style="max-width: 382px;">
+    <h4 translate>HOME.WELCOME</h4>
+
+    <img id="logo" src="./assets/img/logo.png" [title]="'APP_NAME'|translate"/>
+
+    <p translate>HOME.DESCRIPTION</p>
+
+  </div>
+
 </ion-content>

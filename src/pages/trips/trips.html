@@ -4,82 +4,152 @@
   See http://ionicframework.com/docs/components/#navigation for more info on
   Ionic pages and navigation.
 -->
-<app-toolbar [title]="'TRIPS.TITLE'|translate"></app-toolbar>
-
+<app-toolbar  [title]="'TRIPS.TITLE'|translate"></app-toolbar>
 
 <ion-content padding class="no-padding-xs">
-  <!--<ion-list>
 
-    <ion-item *ngFor="let user of data | async  | select:'users'"
-              routerLink="/trip/1">
-      {{ user.firstName }} {{ user.lastName }}
-    </ion-item>
-
-  </ion-list>-->
-
-  <!--<ngx-datatable
-    class="material striped"
-    [rows]="data | async | select:'users'"
-    [columns]="columns"
-    [columnMode]="'force'"
-    [headerHeight]="50"
-    [footerHeight]="50"
-    [rowHeight]="50">
-  </ngx-datatable>-->
   <mat-table #table [dataSource]="dataSource" class="trips-table"
-             matSort matSortActive="firstName" matSortDisableClear matSortDirection="asc">
+             matSort matSortActive="departureDateTime" matSortDisableClear matSortDirection="asc"
+             [trackBy]="id">
 
-    <!--- Note that these columns can be defined in any order.
-          The actual rendered columns are set as a property on the row definition" -->
+    <ng-container matColumnDef="select">
+      <mat-header-cell class="hidden-xs hidden-sm" *matHeaderCellDef>
+        <mat-checkbox (change)="$event ? masterToggle() : null"
+                      [checked]="selection.hasValue() && isAllSelected()"
+                      [indeterminate]="selection.hasValue() && !isAllSelected()">
+        </mat-checkbox>
+      </mat-header-cell>
+      <mat-cell class="hidden-xs hidden-sm" *matCellDef="let row">
+        <mat-checkbox (click)="$event.stopPropagation()"
+                      (change)="$event ? selection.toggle(row) : null"
+                      [checked]="selection.isSelected(row)">
+        </mat-checkbox>
+      </mat-cell>
+    </ng-container>
 
-    <!-- Number Column
-    <ng-container matColumnDef="number">
-      <mat-header-cell *matHeaderCellDef>#</mat-header-cell>
-      <mat-cell *matCellDef="let row">{{ row.number }}</mat-cell>
-    </ng-container>-->
+    <!-- Number Column -->
+    <ng-container matColumnDef="id">
+      <mat-header-cell class="hidden-xs hidden-sm" *matHeaderCellDef>
+        <span *ngIf="!loading">#</span>
+        <ion-spinner [ngClass]="{'center':true}" *ngIf="loading"></ion-spinner>
+      </mat-header-cell>
+      <mat-cell  class="hidden-xs hidden-sm" *matCellDef="let row">{{ row.currentData.id }}</mat-cell>
+    </ng-container>
 
-    <!-- firstName Column -->
-    <ng-container matColumnDef="firstName">
-      <mat-header-cell *matHeaderCellDef>First Name</mat-header-cell>
-      <mat-cell *matCellDef="let row">
+    <!-- departure date time  -->
+    <ng-container matColumnDef="departureDateTime">
+      <mat-header-cell *matHeaderCellDef mat-sort-header>
+        <span translate>TRIPS.COL_HEADERS.DEPARTURE_DATE_TIME</span>
+      </mat-header-cell>
+      <mat-cell *matCellDef="let row" >
         <mat-form-field floatPlaceholder="never">
-          <input [formControl]="row.validator.controls['name']" [readonly]="!row.editing" [(ngModel)]="row.currentData.name" matInput>
+          <input matInput
+                 [matDatepicker]="departureDatepicker"
+                 [formControl]="row.validator.controls['departureDateTime']"
+                 [readonly]="!row.editing"
+                 [appAutofocus]="row.editing"
+                 [ngModel]="row.currentData.departureDateTime">
+          <mat-datepicker-toggle matSuffix [for]="departureDatepicker"></mat-datepicker-toggle>
+          <mat-datepicker #departureDatepicker></mat-datepicker>
+          <mat-error *ngIf="row.validator.controls['departureDateTime'].hasError('required')" translate>ERROR.FIELD_REQUIRED</mat-error>
+        </mat-form-field>
+
+      </mat-cell>
+
+    </ng-container>
+
+    <!-- departure location -->
+    <ng-container matColumnDef="departureLocation">
+      <mat-header-cell *matHeaderCellDef translate>TRIPS.COL_HEADERS.DEPARTURE_LOCATION</mat-header-cell>
+      <mat-cell *matCellDef="let row" >
+        <mat-form-field floatPlaceholder="never">
+          <input matInput
+                 [matAutocomplete]="autoDepartureLocation"
+                 [readonly]="!row.editing"
+                 [ngModel]="row.currentData.departureLocation">
+        </mat-form-field>
+
+        <mat-autocomplete #autoDepartureLocation="matAutocomplete" [displayWith]="displayReferentialFn">
+          <mat-option *ngFor="let location of locations" [value]="location">
+            {{ location.name }}
+          </mat-option>
+        </mat-autocomplete>
+      </mat-cell>
+    </ng-container>
+
+    <!-- return date time -->
+    <ng-container matColumnDef="returnDateTime">
+      <mat-header-cell *matHeaderCellDef translate>TRIPS.COL_HEADERS.RETURN_DATE_TIME</mat-header-cell>
+      <mat-cell *matCellDef="let row" >
+        <mat-form-field floatPlaceholder="never">
+          <input matInput [matDatepicker]="returnDatepicker"
+                 [formControl]="row.validator.controls['returnDateTime']"
+                 [readonly]="!row.editing"
+                 [ngModel]="row.currentData.returnDateTime">
+          <mat-datepicker-toggle matSuffix [for]="returnDatepicker"></mat-datepicker-toggle>
+          <mat-datepicker #returnDatepicker></mat-datepicker>
         </mat-form-field>
       </mat-cell>
     </ng-container>
 
-    <!-- lastName Column -->
-    <ng-container matColumnDef="lastName">
-      <mat-header-cell *matHeaderCellDef>Last Name</mat-header-cell>
-      <mat-cell *matCellDef="let row">
+    <!-- comments Column -->
+    <ng-container matColumnDef="comments">
+      <mat-header-cell *matHeaderCellDef translate>TRIPS.COL_HEADERS.COMMENTS</mat-header-cell>
+      <mat-cell *matCellDef="let row" >
         <mat-form-field floatPlaceholder="never">
-          <input [formControl]="row.validator.controls['id']" type="number" [(ngModel)]="row.currentData.id" matInput>
+          <input matInput
+                 [formControl]="row.validator.controls['comments']"
+                 [readonly]="!row.editing"
+                 [(ngModel)]="row.currentData.comments">
         </mat-form-field>
       </mat-cell>
     </ng-container>
 
     <!-- Edit buttons -->
     <ng-container matColumnDef="actionsColumn">
-      <mat-header-cell *matHeaderCellDef>
-        <button mat-icon-button color="accent" (click)="dataSource.createNew()"><i class="fa fa-plus icon ion-plus"></i>ADD</button>
+      <mat-header-cell *matHeaderCellDef col col-5>
+        <button ion-button icon-left small color="accent" (click)="dataSource.createNew()" >
+          <ion-icon name="md-add"></ion-icon>
+          <span translate>COMMON.BTN_ADD</span>
+        </button>
       </mat-header-cell>
-      <mat-cell *matCellDef="let row">
-        <button *ngIf="!row.editing" mat-icon-button color="primary" focusable="false" (click)="row.startEdit()">
-          <i class="fa fa-pencil icon ion-edit"></i>PENCIL
+      <mat-cell *matCellDef="let row" col col-5>
+        <button ion-button icon-only small color="primary"
+                *ngIf="row.editing"  focusable="false" (click)="confirmAndAddRow(row)" >
+          <ion-icon name="md-add"></ion-icon>
         </button>
-        <button *ngIf="row.editing" mat-icon-button color="primary" focusable="false" (click)="row.confirmEditCreate()">
-          <i class="fa fa-check icon mat-icon"></i>CHECK
-        </button>
-        <button mat-icon-button color="primary" focusable="false" (click)="row.cancelOrDelete()">
-          <i class="fa fa-times mat-icon"></i>{{ row.editing ? 'cancel' : 'delete'}}
+        <button ion-button icon-only small color="light" focusable="false" (click)="row.cancelOrDelete()">
+          <ion-icon name="md-trash"></ion-icon>
         </button>
       </mat-cell>
     </ng-container>
 
     <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
-    <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
+    <mat-row *matRowDef="let row; columns: displayedColumns;" ></mat-row>
   </mat-table>
+
+  <!-- Bottom buttons -->
+  <button ion-button icon-left small color="primary" (click)="addRow()" *ngIf="!loading && !dirty">
+    <ion-icon name="md-add"></ion-icon>
+    <span translate>COMMON.BTN_ADD</span>
+  </button>
+  <button ion-button icon-left small color="light" *ngIf="dirty" (click)="save()" >
+    <ion-icon name="md-close"></ion-icon>
+    <span translate>COMMON.BTN_CANCEL</span>
+  </button>
+
+  <button ion-button icon-left small color="danger" *ngIf="dirty" (click)="save()" >
+    <ion-icon name="md-checkmark"></ion-icon>
+    <span translate>COMMON.BTN_SAVE</span>
+  </button>
 
   <mat-paginator [length]="resultsLength" [pageSize]="30">
   </mat-paginator>
+
+  <ion-fab right bottom class="visible-xs visible-sm">
+    <button ion-fab color="light"><ion-icon name="arrow-dropleft"></ion-icon></button>
+    <ion-fab-list side="left">
+      <button ion-fab color="accent" (click)="dataSource.createNew()"><ion-icon name="md-add"></ion-icon></button>
+    </ion-fab-list>
+  </ion-fab>
 </ion-content>

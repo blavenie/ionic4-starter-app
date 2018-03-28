@@ -1,44 +1,35 @@
 import db from '../database/index';
-import {compose, prop, head} from 'ramda'
+//import {compose, prop, head} from 'ramda'
 // Hooray for Functional Programming //
 
 //Helpers//
 
-async function getUserIdFromName(name){
-  let getId = compose(prop('id'), head)
-  let result = await db.where('name', name).select('id').from('users');
+async function getPersonsByLastName(lastName){
+  let result = await db.where('lastName', lastName).select('id', 'lastName', 'firstName').from('persons');
+  return result;
+}
 
-  return getId(result);
+async function getAllTrips(){
+  let result = await db.select('id', 'comments', 'departureDateTime', 'returnDateTime').from('trips');
+  return result;
 }
 
 //GraphQL Query Resolvers//
 
-export async function resolveUsers(rootValue, {name} ){
-  let id = await getUserIdFromName(name);
+export async function resolvePersons(rootValue, {lastName} ){
+  let result = await getPersonsByLastName(lastName);
+  return result;
+}
 
-  return [{
-    id: id, 
-    name: name, 
-    messages: await db.where('user_id', id).select('text', 'created_at').from('messages') 
-  }];
+export async function resolveTrips(rootValue, {offset, size, sortBy, sortDirection} ){
+  let result = await getAllTrips();
+  return result;
 }
 
 //GraphQL Mutation Resolvers//
 
-export async function resolvePostMessage(rootValue, {name, text}){
-  let newMessage = {
-    user_id: await getUserIdFromName(name),
-    text: text,
-    created_at: new Date()
-  };
-
-  await db('messages').insert(newMessage);
-  return newMessage;
-}
-
-export async function resolveCreateUser(rootValue, {name}){
-  let newUser = {name: name}
-  
-  await db('users').insert(newUser);
-  return newUser;
+export async function resolveCreatePerson(rootValue, {firstName, lastName}){
+  let newPerson = {firstName: firstName, lastName: lastName};
+  await db('persons').insert(newPerson);
+  return newPerson;
 }

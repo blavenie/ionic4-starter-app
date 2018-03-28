@@ -1,3 +1,26 @@
 page-home {
 
+  .logo {
+    margin-top: 15px;
+    width: 100%;
+    height: 70px;
+    background-position: center center;
+    background-repeat: no-repeat;
+    background-image: url('./assets/img/logo.png');
+    background-size: 64px 64px;
+  }
+
+  .light-bg {
+    background-color: rgba(255,255,255,.7);
+  }
+
+  .center {
+    text-align: center;
+  }
+
+  .padding.center {
+    display: inline-block;
+    padding: 15px;
+  }
+
 }
