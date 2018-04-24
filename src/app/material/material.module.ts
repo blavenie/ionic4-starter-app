@@ -2,8 +2,8 @@ import {NgModule} from "@angular/core";
 import {BrowserAnimationsModule} from "@angular/platform-browser/animations";
 import {
   MatPaginatorModule, MatTableModule, MatSortModule, MatFormFieldModule, MatInputModule,
-  MatAutocompleteModule, MatCheckboxModule, MatExpansionModule, MatToolbarModule
-  //,MatButtonModule
+  MatAutocompleteModule, MatCheckboxModule, MatExpansionModule, MatToolbarModule, MatDialogModule, MatIconModule,
+  MatButtonModule, MatMenuModule, MatSelectModule, MatCardModule, MatTabsModule, MatListModule, MatStepperModule
 } from "@angular/material";
 import {CdkTableModule} from "@angular/cdk/table";
 import {MatDatepickerModule} from '@angular/material/datepicker';
@@ -18,12 +18,20 @@ const modules = [
   MatFormFieldModule,
   MatInputModule,
   CdkTableModule,
-  // Date
   MatDatepickerModule,
   MatMomentDateModule,
   MatCheckboxModule,
   MatExpansionModule,
-  MatToolbarModule
+  MatToolbarModule,
+  MatDialogModule,
+  MatIconModule,
+  MatButtonModule,
+  MatMenuModule,
+  MatSelectModule,
+  MatCardModule,
+  MatTabsModule,
+  MatListModule,
+  MatStepperModule
 ];
 
 

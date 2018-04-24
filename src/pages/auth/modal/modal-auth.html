@@ -1,23 +1,25 @@
-<!--
-  Generated template for the AuthPage page.
-
-  See http://ionicframework.com/docs/components/#navigation for more info on
-  Ionic pages and navigation.
--->
 <ion-header>
   <ion-toolbar>
+    <ion-buttons left start>
+      <button ion-button class="visible-xs vissible-sm" (click)="cancel()">
+        {{'COMMON.BTN_CANCEL'|translate}}
+      </button>
+    </ion-buttons>
     <ion-title>
       {{'AUTH.TITLE'|translate}}
     </ion-title>
-    <ion-buttons start>
-      <button ion-button (click)="cancel()">
-        {{'COMMON.BTN_CANCEL'|translate}}
-      </button>
+    <ion-buttons end>
+      <ion-spinner *ngIf="loading"></ion-spinner>
+
+      <button ion-button icon-only class="visible-xs vissible-sm" (click)="doSubmit()" *ngIf="!loading">
+        <ion-icon name="checkmark"></ion-icon>
+      </button>      
     </ion-buttons>
   </ion-toolbar>
 </ion-header>
 
 <ion-content padding>
-  <form-auth (onAuth)="onAuth($event)">
-  </form-auth>
+  <form-auth (onSubmit)="doSubmit(data)"
+             (onCancel)="cancel()" #form>
+  </form-auth>  
 </ion-content>

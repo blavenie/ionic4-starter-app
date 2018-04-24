@@ -1,14 +1,6 @@
 page-home {
 
-  .logo {
-    margin-top: 15px;
-    width: 100%;
-    height: 70px;
-    background-position: center center;
-    background-repeat: no-repeat;
-    background-image: url('./assets/img/logo.png');
-    background-size: 64px 64px;
-  }
+  
 
   .light-bg {
     background-color: rgba(255,255,255,.7);
@@ -23,4 +15,76 @@ page-home {
     padding: 15px;
   }
 
+  .main-content {
+    @extend .center;
+    @extend .padding;
+    @extend .light-bg;
+
+    min-width: 240px;
+    z-index: 99;
+  }
+
+  .bottom-banner {
+    @extend .center;
+    @extend .padding;
+    @extend .light-bg;
+
+    min-width: 240px;
+
+    z-index: -99;
+
+    img.logo {
+      max-height: 50px;
+    }
+  }
+
+  // Extra small device: Phones (<767px)
+  @media screen and (max-width: $screen-xs-max) {
+    ion-content {
+      // Avoid boittom-banner to override main-content
+      min-height: 539px;
+    }
+
+    .bottom-banner {
+
+      img.logo {
+        max-height: 30px;
+      }
+    }
+  }
+
+
+  // Small devices: Tablets (≥768px)
+  @media screen and (max-width: $screen-sm-max) and (min-width: $screen-sm){
+    ion-content {
+      // Avoid boittom-banner to override main-content
+      min-height: 555px;
+    }
+
+    .bottom-banner {
+      img.logo {
+        max-height: 40px;
+      }
+    }
+  }
+
+   // Desktop or wide screen
+   @media screen and (min-width: $screen-md) {
+
+    ion-content {
+      // Avoid boittom-banner to override main-content
+      min-height: 606px;
+    }
+
+    .main-content {
+      padding-bottom: 0px;
+    }
+
+    .bottom-banner {
+      position: absolute;
+      bottom: 16px;
+      left: 16px;
+      right: 16px;
+    }
+  }
 }

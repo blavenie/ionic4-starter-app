@@ -1,142 +1,215 @@
-import {Injectable,} from "@angular/core";
-import {WalletService} from "./wallet-service"
-import gql from "graphql-tag";
-import {Apollo} from "apollo-angular";
-import {ApolloQueryResult, WatchQueryOptions} from 'apollo-client';
-import { QueryRef } from 'apollo-angular';
-import { FetchResult } from 'apollo-link';
-import {Observable} from "rxjs";
-import {DateTime} from "ionic-angular";
-import {Referential} from "./referential-service";
+import {Moment} from "moment/moment";
 
 
-export class Trip {
+export declare interface Cloneable<T> {
+  clone(): T;
+}
+
+export abstract class Entity<T> implements Cloneable<T> {
   id: number;
-  departureDateTime: DateTime;
-  returnDateTime: Date;
+  updateDate: Date | Moment;
+  dirty: boolean = false;
+
+  abstract clone(): T;
+
+  asObject(): any {
+    const target:any = Object.assign({}, this);
+    delete target.dirty;
+    delete target.__typename;
+    return target;
+  }
+
+  fromObject(source:any) {
+    this.id = source.id;
+    this.updateDate = source.updateDate;
+    this.dirty = source.dirty;
+  }
+}
+
+
+export class Referential extends Entity<Referential>  {
+  label: string;
+  name: string;
+
+  constructor(data?: {
+    id?: number,
+    label?: string,
+    name?: string} ) {
+    super();
+    this.id = data && data.id;
+    this.label = data && data.label;
+    this.name = data && data.name;
+  }
+
+  clone(): Referential {
+    return Object.assign(new Referential(), this);
+  }
+
+  fromObject(source:any) {
+    super.fromObject(source);
+    this.label = source.label;
+    this.name = source.name;
+  }
+}
+
+export class Trip extends Entity<Trip> {
+  departureDateTime: Date | Moment;
+  returnDateTime: Date | Moment;
   comments: string;
-  updateDate: DateTime;
-  creationDate: DateTime;
+  creationDate: Date | Moment;
   departureLocation: Referential;
   returnLocation: Referential;
   recorderDepartment: Referential;
   vessel: Referential;
   vesselId: number;
+
   constructor() {
-    this.departureLocation = Object.;
+    super();
+    this.departureLocation = new Referential();
     this.returnLocation = new Referential();
+    this.recorderDepartment = new Referential();
+    this.vessel = new Referential();
+    this.dirty = false;
+  }
+
+  clone(): Trip {
+    const res = Object.assign(new Referential(), this);
+    res.departureLocation = this.departureLocation && this.departureLocation.clone() || undefined;
+    res.returnLocation = this.returnLocation && this.returnLocation.clone() || undefined;
+    res.recorderDepartment = this.recorderDepartment && this.recorderDepartment.clone() || undefined;
+    res.vessel = this.vessel && this.vessel.clone() || undefined;
+    return res;
+  }
+
+  asObject(): any {
+    const target:any = Object.assign({}, this);
+    delete target.dirty;
+    delete target.__typename;
+    target.departureLocation = this.departureLocation && this.departureLocation.asObject() || undefined;
+    target.returnLocation = this.returnLocation && this.returnLocation.asObject() || undefined;
+    target.recorderDepartment = this.recorderDepartment && this.recorderDepartment.asObject() || undefined;
+    target.vessel = this.vessel && this.vessel.asObject() || undefined;
+    return target;
+  }
+
+  fromObject(source:any) {
+    super.fromObject(source);
+    this.departureDateTime = source.departureDateTime;
+    this.returnDateTime = source.returnDateTime;
+    this.comments = source.comments;
+    this.creationDate = source.creationDate;
+    source.departureLocation && this.departureLocation.fromObject(source.departureLocation);
+    source.returnLocation && this.returnLocation.fromObject(source.returnLocation);
+    source.recorderDepartment && this.recorderDepartment.fromObject(source.recorderDepartment);
+    source.vessel && this.vessel.fromObject(source.vessel);
+    this.vesselId = source.vesselId;
   }
 }
-export declare type TripResult = {
-  trips: Trip[];
+
+export class Person extends Entity<Person> implements Cloneable<Person> {
+  firstName: string;
+  lastName: string;
+  email: string;
+  pubkey: string;
+  avatar: string;
+  creationDate: Date | Moment;
+  department: Referential;
+  profiles: Referential[];
+
+  constructor() {
+    super();
+    this.department = new Referential();
+  }
+  
+  clone(): Person {
+    const target = new Person();
+    this.copy(target);
+    return target;
+  }
+
+  copy(target: Person) {
+    Object.assign(target, this);
+    target.department = this.department.clone();
+    target.profiles =  this.profiles && this.profiles.map(p => p.clone()) || undefined;
+  }
+
+  asObject(): any {
+    const target:any = super.asObject();
+    delete target.dirty;
+    delete target.__typename;
+    target.department = this.department && this.department.asObject() || undefined;
+    target.profiles = this.profiles && this.profiles.map(p => p.asObject()) || undefined;
+    return target;
+  }
+
+  fromObject(source:any) {
+    super.fromObject(source);
+    this.firstName = source.firstName;
+    this.lastName = source.lastName;
+    this.email = source.email;
+    this.creationDate = source.creationDate;
+    this.pubkey = source.pubkey;
+    this.avatar = source.avatar;
+    source.department && this.department.fromObject(source.department);
+    this.profiles = source.profiles && source.profiles.map(p => {
+      const res = new Referential();
+      res.fromObject(p);
+      return res;
+    }) || undefined;
+  }
 }
-export declare class TripFilter {
-  startDate: Date;
-  endDate: Date;
+
+
+export class UserSettings extends Entity<UserSettings> implements Cloneable<UserSettings> {
+  locale: string;
+
+  clone(): UserSettings {
+    const res = Object.assign(new UserSettings(), this);
+    return res;
+  }
+
+  asObject(): any {
+    const res:any = super.asObject();
+    delete res.dirty;
+    delete res.__typename;
+    return res;
+  }
+
+  fromObject(source:any) {
+    super.fromObject(source);
+    this.locale = source.locale;
+  }
 }
 
 
-const Trips = gql`
-  query Trips($offset: Int, $size: Int, $sortBy: String, $sortDirection: String){
-    trips(offset: $offset, size: $size, sortBy: $sortBy, sortDirection: $sortDirection){
-      id
-      departureDateTime
-      returnDateTime
-      creationDate
-      updateDate
-      vesselId
-      comments
-      departureLocation {
-        id
-        label
-        name
-      }
-      returnLocation {
-        id
-        label
-        name
-      }
-      recorderDepartment {
-        id
-        label
-        name
-      }
-    }
-  }
-`;
-const SaveTrips = gql`
-  mutation saveTrips($trips:[TripVOInput]){
-    saveTrips(trips: $trips){
-      id
-    }
-  }
-`;
+export class Account extends Person {
+  settings: UserSettings;
 
-@Injectable()
-export class TripService {
+  constructor() {
+    super();
+    this.settings = new UserSettings();
+  }  
 
-  public data:any = {};
-
-  constructor(
-    private apollo: Apollo,
-    private wallet: WalletService
-  ) {
-    this.resetData();
-    this.wallet.onLogin.subscribe(event => this.onLogin(event));
-    this.wallet.onLogout.subscribe(event => this.onLogout());
+  clone(): Account {
+    const target = new Account();
+    super.copy(target)
+    return target;
   }
 
-  private resetData() {
-
+  copy(target: Account): Account {
+    super.copy(target);
+    target.settings = this.settings.clone();
+    return target;
   }
 
-  private onLogin(data): void {
-    // TODO user data ?
+  asObject(): any {
+    const target:any = super.asObject();
+    target.settings = this.settings && this.settings.asObject() || undefined;
+    return target;
   }
 
-  private onLogout(): void {
-    this.resetData();
-  }
-
-  getTrips(options?: {
-      offset?: number;
-      size?: number;
-      sortBy?: string;
-      sortDirection?: string;
-    }): Observable<ApolloQueryResult<Trip>> {
-    const variables = {
-      offset: options && options.offset || 0,
-      size: options && options.size || 100,
-      sortBy: options && options.sortBy || "departureDateTime",
-      sortDirection: options && options.sortDirection || "asc"
-    };
-    let obTrips: QueryRef<Trip> = this.apollo.watchQuery<Trip>({
-      query: Trips,
-      variables: variables
-    });
-    return obTrips.valueChanges;
-  }
-
-  saveTrips(trips: Trip[]): Observable<FetchResult<Trip>> {
-    const tripsToSave = trips && trips
-      //.filter(t => !t || !t.id || t.id < 0)
-      .map(t => {
-        return {
-          departureDateTime: t.departureDateTime || t.returnDateTime,
-          returnDateTime: t.returnDateTime || t.departureDateTime,
-          departureLocation: {id: t.departureLocation.id||t.returnLocation.id},
-          returnLocation: {id:t.returnLocation.id||t.departureLocation.id},
-          recorderDepartment: {id: t.recorderDepartment && t.recorderDepartment.id || 1},
-          vesselId: t.vessel && t.vessel.id || 1,
-          creationDate: t.creationDate
-        };
-      });
-
-    return this.apollo.mutate({
-      mutation: SaveTrips,
-      variables: {
-        trips: tripsToSave
-      }
-    });
+  fromObject(source:any) {
+    super.fromObject(source);
+    source.settings && this.settings.fromObject(source.settings);
   }
 }

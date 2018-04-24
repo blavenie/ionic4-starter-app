@@ -1,20 +1,61 @@
-<!--<ion-toolbar></ion-toolbar>-->
-
-<ion-content padding
+<ion-content padding 
              class="bg-image-cover center"
              [ngStyle]="{'background-image': 'url('+bgImage+')'}">
 
-  <div class="logo"></div>
-
   <p class="hidden-xs">&nbsp;</p>
 
-  <div class="center padding light-bg" style="max-width: 382px;">
+  <div class="main-content">
+
     <h4 translate>HOME.WELCOME</h4>
+
+    <p ion-text [innerHTML]="'HOME.DESCRIPTION'|translate"></p>    
+
+    <br/>
 
     <img id="logo" src="./assets/img/logo.png" [title]="'APP_NAME'|translate"/>
 
-    <p translate>HOME.DESCRIPTION</p>
+    <br/>
+    <br/>
+    <div>
+      <button ion-button icon-left full color="light" [routerLink]="['/trips']">
+        <ion-icon name="search"></ion-icon>
+        <span translate>HOME.BTN_TRIPS</span>
+      </button>
 
+      <button ion-button icon-left full color="primary" [routerLink]="['/trips']" *ngIf="!isLogin">
+        <ion-icon name="log-in"></ion-icon>
+        <span translate>AUTH.BTN_LOGIN</span>
+      </button>
+
+      <button ion-button icon-left full color="light" [routerLink]="['/trips']" *ngIf="isLogin" disabled>
+        <ion-icon name="contact"></ion-icon>
+        <span translate>HOME.BTN_MY_ACCOUNT</span>
+      </button>
+
+      <p *ngIf="!isLogin">
+        <span translate>AUTH.NO_ACCOUNT_QUESTION</span>
+        <a href="#" (click)="register()">
+          <span translate>AUTH.BTN_REGISTER</span>
+        </a>
+      </p>
+
+      <p *ngIf="isLogin" ion-text color="primary" class="hidden-xs hidden-sm">
+        <span  [innerHTML]="'HOME.NOT_THIS_ACCOUNT_QUESTION' | translate: {displayName: displayName}"></span>
+        <br/>
+        <a ion-text color="danger" href="#" (click)="logout($event)">
+          <span translate>HOME.BTN_DISCONNECT</span>
+        </a>
+      </p>
+    </div>
+  </div>
+
+  <p class="hidden-xs">&nbsp;</p>
+
+  <div class="bottom-banner">
+      <img class="logo" src="./assets/img/logo/logo-interreg2seas.png">
+      <img class="logo" src="./assets/img/logo/logo-ilvo-text.png">
+      <img class="logo" src="./assets/img/logo/logo-fromnord.png">
+      <img class="logo" src="./assets/img/logo/logo-ifremer.png">
   </div>
 
 </ion-content>

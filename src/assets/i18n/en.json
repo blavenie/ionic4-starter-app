@@ -9,38 +9,92 @@
     "BTN_EDIT": "Edit",
     "BTN_DELETE": "Delete",
     "BTN_VALIDATE": "Validate",
-    "BTN_SAVE": "Sauvegarder"
-
+    "BTN_SAVE": "Save",
+    "BTN_FILTER": "Filter",
+    "BTN_RELOAD": "Reload",
+    "BTN_REFRESH": "Refresh",
+    "BTN_SEARCH": "Search",
+    "BTN_NEXT": "Next",
+    "BTN_BACK": "Back",
+    "BTN_SEND": "Send"
   },
   "MENU": {
     "HOME": "Home",
-    "TRIPS": "Trips"
+    "TRIPS": "Trips",
+    "USERS": "Users",
+    "BTN_ACCOUNT": "Account",
+    "BTN_LOGOUT": "Log out",
+    "FOOTER_VERSION_ABOUT": "v{{version}} | About"
   },
   "HOME": {
     "WELCOME": "Welcome to the SUMARiS web site!",
-    "DESCRIPTION": "Completed skate stocks shared database."
-  },
-  "PROFILE": {
-    "PROFILE_ADMIN": "Administrator",
-    "BTN_EDIT": "Edit Profile",
-    "BTN_LOG_OUT": "Log Out"
-  },
+    "DESCRIPTION": "European shared database for management of skate stocks.",
+    "BTN_TRIPS": "Search trips",
+    "NOT_THIS_ACCOUNT_QUESTION": "You are not <b>{{displayName}}</b>?",
+    "BTN_DISCONNECT": "Disconnect this account",
+    "BTN_MY_ACCOUNT": "My account"
+  },  
   "AUTH": {
-    "TITLE": "Authentication"
+    "TITLE": "Authentication",
+    "BTN_LOGIN": "Log In",
+    "BTN_LOGOUT": "Log Out",
+    "BTN_REGISTER": "Sign up",
+    "NO_ACCOUNT_QUESTION": "Don't have a account?"
+  },
+  "REGISTER": {
+    "TITLE": "Registration",
+    "STEP_EMAIL": "Email",
+    "STEP_PASSWORD": "Password",
+    "STEP_USER_DETAILS": "user details",
+    "CONFIRM_EMAIL": "Email (confirmation)",
+    "CONFIRM_PASSWORD": "Password (confirmation)",
+    "ERROR": {
+      "NOT_SAME_EMAIL": "Emails not matched",
+      "NOT_SAME_PASSWORD": "Passwords not matched",
+      "EMAIL_ALREADY_REGISTERED": "Email already registered"
+    }
+  },
+  "USER": {
+    "TITLE": "User",
+    "EMAIL": "Email",
+    "PASSWORD": "Password",
+    "FIRST_NAME": "First name",
+    "LAST_NAME": "Last name",
+    "PROFILE": {
+      "PROFILE_ADMIN": "Administrator",
+      "PROFILE_OBSERVER": "Observer",
+      "PROFILE_USER": "Utilisateur"
+    }
   },
   "TRIPS": {
     "TITLE": "Fishing trips",
-    "COL_HEADERS": {
-      "DEPARTURE_DATE_TIME": "Departure date",
-      "DEPARTURE_LOCATION": "Departure harbour",
-      "RETURN_DATE_TIME": "Return date",
-      "COMMENTS": "Comments"
+    "FILTER": {
+      "TITLE": "Search options:",
+      "START_DATE": "Start date",
+      "END_DATE": "End date"
     }
   },
   "TRIP": {
-    "TITLE": "Fishing trip"
+    "TITLE": "Fishing trip",
+    "DEPARTURE_DATE_TIME": "Departure date",
+    "DEPARTURE_LOCATION": "Departure harbour",
+    "RETURN_DATE_TIME": "Return date",
+    "RETURN_LOCATION": "Return harbour",
+    "COMMENTS": "Comments",
+    "NEW": {
+      "TITLE": "New fishing trip"
+    },
+    "EDIT": {
+      "TITLE": "Edit fishing trip"
+    }
   },
   "ERROR": {
-    "FIELD_REQUIRED": "This field is required"
+    "FIELD_REQUIRED": "This field is required.",
+    "FIELD_TOO_SHORT": "This field value is too short.",
+    "FIELD_TOO_SHORT_WITH_LENGTH": "Value is too short (min {{minLength]] characters).",
+    "FIELD_TOO_LONG": "Value is exceeding max length.",
+    "FIELD_TOO_LONG_WITH_LENGTH": "Value is too long (max {{maxLength}} characters).",
+    "SPACE_NOT_ALLOW": "Spaces or special caracters not allowed",
+    "SCRYPT_ERROR": "Unable to create account keyrs"
   }
 }

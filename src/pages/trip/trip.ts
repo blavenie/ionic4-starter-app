@@ -1,6 +1,5 @@
 import {Component, OnInit} from '@angular/core';
-import { IonicPage, NavParams } from 'ionic-angular';
-import {Router, ActivatedRoute} from "@angular/router";
+import {ActivatedRoute} from "@angular/router";
 
 /**
  * Generated class for the TripPage page.
@@ -15,9 +14,11 @@ import {Router, ActivatedRoute} from "@angular/router";
 })
 export class TripPage implements OnInit{
 
-  constructor(private route: ActivatedRoute, private router: Router) {
+  constructor(
+    private route: ActivatedRoute, 
+    //private router: Router
+  ) {
     this.route.params.subscribe(res => console.log(res));
-
   }
 
   ngOnInit() {

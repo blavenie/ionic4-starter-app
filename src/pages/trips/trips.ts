@@ -1,22 +1,16 @@
-import {Component, EventEmitter, OnInit, Output, ViewChild} from "@angular/core";
-import gql from "graphql-tag";
-import {Apollo} from "apollo-angular";
-import {MatPaginator, MatSort, Sort} from "@angular/material";
+import {Component, EventEmitter, OnInit, Output, ViewChild, OnDestroy} from "@angular/core";
+import {MatPaginator, MatSort} from "@angular/material";
 import {merge} from "rxjs/observable/merge";
-import {of as observableOf} from "rxjs/observable/of";
-import {catchError} from "rxjs/operators/catchError";
-import {map} from "rxjs/operators/map";
-import {startWith} from "rxjs/operators/startWith";
-import {switchMap} from "rxjs/operators/switchMap";
-import {TableDataSource, ValidatorService} from "angular4-material-table";
+import {startWith, switchMap} from "rxjs/operators";
+import {ValidatorService, TableElement} from "angular4-material-table";
+import {AppTableDataSource} from "../../app/material/material.table";
 import {TripValidatorService} from "./validator/validators";
-import { ApolloQueryResult } from 'apollo-client';
-import {TripService, Trip, TripResult} from "../../services/trip-service"
-import {LoadingController, Loading} from "ionic-angular";
-import {Referential} from "../../services/referential-service";
-import {Observable} from "rxjs";
+import {TripService, TripFilter} from "../../services/trip-service";
 import {SelectionModel} from "@angular/cdk/collections";
-
+import {TripModal} from "../trip/modal/modal-trip";
+import {Trip, Referential} from "../../services/model";
+import {Subscription} from "rxjs";
+import { ModalController } from "ionic-angular";
 
 @Component({
   selector: 'page-trips',
@@ -25,24 +19,31 @@ import {SelectionModel} from "@angular/cdk/collections";
     {provide: ValidatorService, useClass: TripValidatorService }
   ],
 })
-export class TripsPage implements OnInit{
+export class TripsPage implements OnInit, OnDestroy {
 
   any: any;
+  subscriptions: Subscription[] = [];
   displayedColumns = ['select', 'id',
     'departureDateTime', 'departureLocation',
     'returnDateTime',  //'returnLocation',
-    'comments',  'actionsColumn'];
-  dataSource:TableDataSource<Trip>;
+    'comments'];
+  dataSource:AppTableDataSource<Trip, TripFilter>;
   resultsLength = 0;
   loading = true;
+  showFilter = false;
   dirty = false;
   isRateLimitReached = false;
-  locations = [
-    {id: 1,name: 'Brest'},
-    {id: 2,name: 'Boulogne'}
+  locations: Referential[] = [
+    new Referential({id: 1, label: 'XBR', name: 'Brest'}),
+    new Referential({id: 2, label: 'XBL', name: 'Boulogne'})
   ];
-  selection = new SelectionModel<Trip>(true, []);
-  filteredLocations: Observable<Referential[]>;
+  selection = new SelectionModel<TableElement<Trip>>(true, []);
+  selectedRow: TableElement<Trip> = undefined;
+  onRefresh: EventEmitter<any> = new EventEmitter<any>();
+  filter: TripFilter = {
+    startDate: null,
+    endDate: null
+  };
 
   @ViewChild(MatPaginator) paginator: MatPaginator;
   @ViewChild(MatSort) sort: MatSort;
@@ -50,71 +51,64 @@ export class TripsPage implements OnInit{
   @Output()
   listChange = new EventEmitter<Trip[]>();
 
-  constructor(private tripValidatorService: TripValidatorService,
-              private tripService: TripService
+  constructor(//private dialog: MatDialog,
+              private tripValidatorService: TripValidatorService,
+              private tripService: TripService,
+              private modalCtrl: ModalController
   ) {
+    this.dataSource = new AppTableDataSource<Trip, TripFilter>(Trip, this.tripService, this.tripValidatorService);
   };
 
-
   ngOnInit() {
-
-    this.loading = true;
 
     // If the user changes the sort order, reset back to the first page.
     this.sort.sortChange.subscribe(() => this.paginator.pageIndex = 0);
 
-    merge(this.sort.sortChange,
-        this.paginator.page)
+    merge(
+      this.sort.sortChange,
+      this.paginator.page,
+      this.onRefresh
+    )
       .pipe(
         startWith({}),
         switchMap((any:any) => {
-          this.loading = true;
-          var options = {
-            offset: this.paginator.pageIndex * this.paginator.pageSize,
-            size: this.paginator.pageSize,
-            sortBy: null,
-            sortDirection: null
-          };
-          if (this.sort && this.sort.active) {
-            options.sortBy = this.sort.active;
-            options.sortDirection = this.sort.direction;
-          }
-
-          return this.tripService.getTrips(options);
-        }),
-        catchError((err) => {
-          console.error(err);
-          return observableOf({data: null, loading: false});
+          this.dirty = false;
+          this.selection.clear();
+          this.selectedRow = null;
+          return this.dataSource.load(
+            this.paginator.pageIndex * this.paginator.pageSize,
+            this.paginator.pageSize || 10,
+            this.sort.active,
+            this.sort.direction,
+            this.filter
+          );
         })
-      ).subscribe(({ data, loading }) => {
-        this.loading = loading ;
-        var trips;
+      )
+      .subscribe(data => {
         if (data) {
-          this.isRateLimitReached = data.trips.length < this.paginator.pageSize;
-          this.resultsLength = this.paginator.pageIndex * this.paginator.pageSize + data.trips.length;
-          if (this.paginator.pageIndex == 0 && data.trips.length == 0) {
-            trips = [{}];
-          }
-          else {
-            console.debug('[trips] Loaded ' + data.trips.length + ' trips: ', data.trips);
-            trips = data.trips;
-          }
-
+          this.isRateLimitReached = data.length < this.paginator.pageSize;
+          this.resultsLength = this.paginator.pageIndex * this.paginator.pageSize + data.length;
+          console.debug('[trips] Loaded ' + data.length + ' trips: ', data);
         }
         else {
+          console.debug('[trips] Loaded NO trips');
           this.isRateLimitReached = true;
           this.resultsLength = 0;
-          trips = [{}];
         }
-        this.dataSource = new TableDataSource<Trip>(trips, Trip, this.tripValidatorService);
-        this.dataSource.datasourceSubject.subscribe(data => this.listChange.emit(data));
-        console.log(this.dataSource);
       });
 
-    this.listChange.subscribe(event => this.onDataChanged(event));
+    // Subscriptions:
+    this.subscriptions.push(this.dataSource.onLoading.subscribe(loading => this.loading = loading));
+    this.subscriptions.push(this.dataSource.datasourceSubject.subscribe(data => this.listChange.emit(data)));
+    this.subscriptions.push(this.listChange.subscribe(event => this.onDataChanged(event)));
   }
 
-  confirmAndAddRow(row) {
+  ngOnDestroy() {
+    this.subscriptions.forEach(s => s.unsubscribe());
+    this.subscriptions = [];
+  }
+
+  confirmAndAddRow(row: TableElement<Trip>) {
     // create
     var valid = false;
     if (row.id<0) {
@@ -154,48 +148,35 @@ export class TripsPage implements OnInit{
     }
   }
 
-  sortData(sort: Sort) {
-
-  }
-
-
   createTrip() {
     var trip = new Trip();
-    trip.departureLocation = new Referential();
-    trip.returnLocation = new Referential();
     return trip;
   }
 
   onDataChanged(data: Trip[]) {
-    if (!this.dirty) {
-      data.forEach(t => {
-        if (!t.id) {
-          this.dirty = true;
-        }
-      });
-    }
+    data.forEach(t => {
+      if (!t.id && !t.dirty) {
+        t.dirty = true;
+      }
+    });
     if (this.dirty) {
-      console.log("[trips] trips changed:", data);
+      console.debug("[trips] trips changed:");
     }
   }
 
   save() {
+    if (this.selectedRow && this.selectedRow.editing) {
+      var confirm = this.selectedRow.confirmEditCreate();
+      if (!confirm) return;
+    }
     console.log("[trips] Saving...");
-    this.tripService.saveTrips(this.dataSource.currentData)
-      .subscribe(({ data }) => {
-        console.log('got data', data);
-      },(error) => {
-        console.error('Error while saving trips', error);
-      });
+    this.dataSource.save().subscribe(res => {
+      this.dirty = false;
+    });    
   }
 
-  /*filterLocation(name: string): Referential[] {
-    return this.locations.filter(option =>
-    option.name.toLowerCase().indexOf(name.toLowerCase()) === 0);
-  }*/
-
   displayReferentialFn(ref?: Referential): string | undefined {
-    return ref ? ref.name : undefined;
+    return ref ? (ref.label + ' - ' + ref.name) : undefined;
   }
 
   /** Whether the number of selected elements matches the total number of rows. */
@@ -205,12 +186,50 @@ export class TripsPage implements OnInit{
   }
 
   /** Selects all rows if they are not all selected; otherwise clear selection. */
-  masterToggle() {
+  masterToggle () {
+    if (this.loading) return;
     this.isAllSelected() ?
       this.selection.clear() :
-      this.dataSource.connect().forEach(row => {
-        this.selection.select(row);
+      this.dataSource.connect().subscribe(rows =>
+        rows.forEach(row => this.selection.select(row))
+      );
+  }
+
+  deleteSelection() {
+    if (this.loading) return;
+    this.selection.selected.forEach(row => {
+      row.delete();
+      this.selection.deselect(row);
+      this.resultsLength--;
     });
+    this.selection.clear();
+  }
+
+  onRowClicked(row) {
+    if (this.selectedRow && this.selectedRow === row) return;
+    if (this.selectedRow && this.selectedRow !== row && this.selectedRow.editing) {
+      var confirm = this.selectedRow.confirmEditCreate();
+      if (!confirm) {
+        return;
+      }
+    }
+    if (!row.editing && !this.loading) {
+      row.startEdit();
+      row.currentData.dirty = true;
+    }
+    this.selectedRow = row;
+    this.dirty = true;
+  }
+
+  openTripModal() {
+    if (this.loading) return;
+
+    let modal = this.modalCtrl.create(TripModal);
+    modal.present();
+  }
+
+  toggleFilter() {
+    this.showFilter = !this.showFilter;
   }
 }
 

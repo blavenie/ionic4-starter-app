@@ -1,15 +1,73 @@
-<!--
-  Generated template for the TripsPage page.
 
-  See http://ionicframework.com/docs/components/#navigation for more info on
-  Ionic pages and navigation.
--->
-<app-toolbar  [title]="'TRIPS.TITLE'|translate"></app-toolbar>
+<app-toolbar  [title]="'TRIPS.TITLE'|translate" color="primary"></app-toolbar>
 
-<ion-content padding class="no-padding-xs">
+<ion-content class="no-padding-xs">
 
-  <mat-table #table [dataSource]="dataSource" class="trips-table"
-             matSort matSortActive="departureDateTime" matSortDisableClear matSortDirection="asc"
+  <mat-toolbar class="pull-right">
+
+    <button mat-icon-button
+            *ngIf="!selection.hasValue()"
+            [title]="'COMMON.BTN_ADD'|translate"
+            (click)="addRow()" >
+      <mat-icon>add</mat-icon>
+    </button>
+    <button mat-icon-button small color="light"
+            *ngIf="!selection.hasValue()"
+            [title]="'COMMON.BTN_REFRESH'|translate"
+            (click)="onRefresh.emit()">
+      <mat-icon>refresh</mat-icon>
+    </button>
+    <button mat-icon-button
+            *ngIf="!selection.hasValue()"
+            [title]="'COMMON.BTN_FILTER'|translate"
+            (click)="filterExpansionPanel.toggle()" >
+      <mat-icon>search</mat-icon>
+    </button>
+    <button mat-icon-button small color="light"
+            *ngIf="selection.hasValue()"
+            [title]="'COMMON.BTN_DELETE'|translate"
+            (click)="deleteSelection()">
+      <mat-icon>delete</mat-icon>
+    </button>
+  </mat-toolbar>
+
+  <!-- search -->
+  <mat-expansion-panel #filterExpansionPanel color="primary">
+    <h4 padding-top translate>TRIPS.FILTER.TITLE</h4>
+
+    <!-- start date -->
+    <mat-form-field>
+      <input matInput
+             [placeholder]="'TRIPS.FILTER.START_DATE'|translate"
+             [matDatepicker]="filterStartDatepicker"
+             [ngModel]="filter.startDate">
+      <mat-datepicker-toggle matSuffix [for]="filterStartDatepicker">
+          <mat-icon matDatepickerToggleIcon>keyboard_arrow_down</mat-icon>
+      </mat-datepicker-toggle>
+      <mat-datepicker #filterStartDatepicker></mat-datepicker>
+    </mat-form-field>
+
+    <!-- end date -->
+    <mat-form-field>
+        <input matInput
+                [placeholder]="'TRIPS.FILTER.END_DATE'|translate"
+                [matDatepicker]="filterEndDatepicker"
+                [ngModel]="filter.endDate">
+        <mat-datepicker-toggle matSuffix [for]="filterEndDatepicker">
+            <mat-icon matDatepickerToggleIcon>keyboard_arrow_down</mat-icon>
+        </mat-datepicker-toggle>
+        <mat-datepicker #filterEndDatepicker></mat-datepicker>
+      </mat-form-field>
+
+    <mat-action-row>
+      <button mat-button (click)="filterExpansionPanel.close()">{{'COMMON.BTN_CANCEL'|translate}}</button>
+      <button mat-raised-button color="primary" (click)="onRefresh.emit(true)">{{'COMMON.BTN_SEARCH'|translate}}</button>
+    </mat-action-row>
+  </mat-expansion-panel>
+
+  <mat-table #table padding-left
+             [dataSource]="dataSource" class="trips-table "
+             matSort matSortActive="departureDateTime" matSortDirection="asc" matSortDisableClear
              [trackBy]="id">
 
     <ng-container matColumnDef="select">
@@ -27,9 +85,9 @@
       </mat-cell>
     </ng-container>
 
-    <!-- Number Column -->
+    <!-- Id Column -->
     <ng-container matColumnDef="id">
-      <mat-header-cell class="hidden-xs hidden-sm" *matHeaderCellDef>
+      <mat-header-cell class="hidden-xs hidden-sm" *matHeaderCellDef mat-sort-header>
         <span *ngIf="!loading">#</span>
         <ion-spinner [ngClass]="{'center':true}" *ngIf="loading"></ion-spinner>
       </mat-header-cell>
@@ -39,9 +97,9 @@
     <!-- departure date time  -->
     <ng-container matColumnDef="departureDateTime">
       <mat-header-cell *matHeaderCellDef mat-sort-header>
-        <span translate>TRIPS.COL_HEADERS.DEPARTURE_DATE_TIME</span>
+        <span translate>TRIP.DEPARTURE_DATE_TIME</span>
       </mat-header-cell>
-      <mat-cell *matCellDef="let row" >
+      <mat-cell class="mat-cell-date-time" *matCellDef="let row" >
         <mat-form-field floatPlaceholder="never">
           <input matInput
                  [matDatepicker]="departureDatepicker"
@@ -49,7 +107,9 @@
                  [readonly]="!row.editing"
                  [appAutofocus]="row.editing"
                  [ngModel]="row.currentData.departureDateTime">
-          <mat-datepicker-toggle matSuffix [for]="departureDatepicker"></mat-datepicker-toggle>
+          <mat-datepicker-toggle matSuffix [for]="departureDatepicker">
+            <mat-icon matDatepickerToggleIcon>keyboard_arrow_down</mat-icon>
+          </mat-datepicker-toggle>
           <mat-datepicker #departureDatepicker></mat-datepicker>
           <mat-error *ngIf="row.validator.controls['departureDateTime'].hasError('required')" translate>ERROR.FIELD_REQUIRED</mat-error>
         </mat-form-field>
@@ -60,18 +120,23 @@
 
     <!-- departure location -->
     <ng-container matColumnDef="departureLocation">
-      <mat-header-cell *matHeaderCellDef translate>TRIPS.COL_HEADERS.DEPARTURE_LOCATION</mat-header-cell>
-      <mat-cell *matCellDef="let row" >
-        <mat-form-field floatPlaceholder="never">
+      <mat-header-cell *matHeaderCellDef>
+        <span translate>TRIP.DEPARTURE_LOCATION</span>
+      </mat-header-cell>
+      <mat-cell *matCellDef="let row" [class.mat-form-field-disabled]="!row.editing">
+        <mat-form-field floatPlaceholder="never"  >
           <input matInput
+                 [formControl]="row.validator.controls['departureLocation']"
                  [matAutocomplete]="autoDepartureLocation"
                  [readonly]="!row.editing"
                  [ngModel]="row.currentData.departureLocation">
+          <mat-error *ngIf="row.validator.controls['departureLocation'].hasError('required')" translate>ERROR.FIELD_REQUIRED</mat-error>
+
         </mat-form-field>
 
         <mat-autocomplete #autoDepartureLocation="matAutocomplete" [displayWith]="displayReferentialFn">
           <mat-option *ngFor="let location of locations" [value]="location">
-            {{ location.name }}
+              {{ location.label }} - {{ location.name }}
           </mat-option>
         </mat-autocomplete>
       </mat-cell>
@@ -79,22 +144,32 @@
 
     <!-- return date time -->
     <ng-container matColumnDef="returnDateTime">
-      <mat-header-cell *matHeaderCellDef translate>TRIPS.COL_HEADERS.RETURN_DATE_TIME</mat-header-cell>
-      <mat-cell *matCellDef="let row" >
+      <mat-header-cell *matHeaderCellDef mat-sort-header>
+        <span translate>TRIP.RETURN_DATE_TIME</span>
+      </mat-header-cell>
+      <mat-cell class="mat-cell-date-time" *matCellDef="let row" >
         <mat-form-field floatPlaceholder="never">
           <input matInput [matDatepicker]="returnDatepicker"
                  [formControl]="row.validator.controls['returnDateTime']"
                  [readonly]="!row.editing"
                  [ngModel]="row.currentData.returnDateTime">
-          <mat-datepicker-toggle matSuffix [for]="returnDatepicker"></mat-datepicker-toggle>
+          <mat-datepicker-toggle matSuffix [for]="returnDatepicker">
+            <mat-icon matDatepickerToggleIcon>keyboard_arrow_down</mat-icon>
+          </mat-datepicker-toggle>
           <mat-datepicker #returnDatepicker></mat-datepicker>
+          <mat-error *ngIf="row.validator.controls['returnDateTime'].hasError('required')" translate>ERROR.FIELD_REQUIRED</mat-error>
         </mat-form-field>
       </mat-cell>
     </ng-container>
 
-    <!-- comments Column -->
+    <!-- Edit buttons -->
     <ng-container matColumnDef="comments">
-      <mat-header-cell *matHeaderCellDef translate>TRIPS.COL_HEADERS.COMMENTS</mat-header-cell>
+      <mat-header-cell *matHeaderCellDef>
+        <span translate>TRIP.COMMENTS</span>
+        <span>
+
+        </span>
+      </mat-header-cell>
       <mat-cell *matCellDef="let row" >
         <mat-form-field floatPlaceholder="never">
           <input matInput
@@ -105,51 +180,56 @@
       </mat-cell>
     </ng-container>
 
-    <!-- Edit buttons -->
-    <ng-container matColumnDef="actionsColumn">
-      <mat-header-cell *matHeaderCellDef col col-5>
-        <button ion-button icon-left small color="accent" (click)="dataSource.createNew()" >
-          <ion-icon name="md-add"></ion-icon>
-          <span translate>COMMON.BTN_ADD</span>
-        </button>
-      </mat-header-cell>
-      <mat-cell *matCellDef="let row" col col-5>
-        <button ion-button icon-only small color="primary"
-                *ngIf="row.editing"  focusable="false" (click)="confirmAndAddRow(row)" >
-          <ion-icon name="md-add"></ion-icon>
-        </button>
-        <button ion-button icon-only small color="light" focusable="false" (click)="row.cancelOrDelete()">
-          <ion-icon name="md-trash"></ion-icon>
-        </button>
-      </mat-cell>
-    </ng-container>
-
     <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
-    <mat-row *matRowDef="let row; columns: displayedColumns;" ></mat-row>
+    <mat-row *matRowDef="let row; columns: displayedColumns;"
+             (click)="onRowClicked(row)"
+             (onblur)="confirmAndAddRow(row)"></mat-row>
   </mat-table>
 
+
+
   <!-- Bottom buttons -->
-  <button ion-button icon-left small color="primary" (click)="addRow()" *ngIf="!loading && !dirty">
-    <ion-icon name="md-add"></ion-icon>
-    <span translate>COMMON.BTN_ADD</span>
-  </button>
-  <button ion-button icon-left small color="light" *ngIf="dirty" (click)="save()" >
-    <ion-icon name="md-close"></ion-icon>
-    <span translate>COMMON.BTN_CANCEL</span>
-  </button>
 
-  <button ion-button icon-left small color="danger" *ngIf="dirty" (click)="save()" >
-    <ion-icon name="md-checkmark"></ion-icon>
-    <span translate>COMMON.BTN_SAVE</span>
-  </button>
+  <div class="mat-ro row" >
 
-  <mat-paginator [length]="resultsLength" [pageSize]="30">
-  </mat-paginator>
+    <div class="col" *ngIf="!loading">
+      <!--<button mat-button icon-left small color="primary" (click)="addRow()" >
+        <ion-icon name="md-add"></ion-icon>
+        <span translate>COMMON.BTN_ADD</span>
+      </button>-->
+      <button mat-raised-button *ngIf="dirty" (click)="onRefresh.emit()" >
+        <ion-icon name="md-close"></ion-icon>
+        <span translate>COMMON.BTN_CANCEL</span>
+      </button>
+      <button mat-raised-button color="primary" *ngIf="dirty" (click)="save()" >
+        <ion-icon name="md-checkmark"></ion-icon>
+        <span translate>COMMON.BTN_SAVE</span>
+      </button>
+    </div>
 
-  <ion-fab right bottom class="visible-xs visible-sm">
+    <div class="col">
+      <mat-paginator [length]="resultsLength"
+                     [pageSize]="10"
+                     [pageSizeOptions]="[10, 50, 100, 200]">
+      </mat-paginator>
+    </div>
+  </div>
+
+  <!--<ion-list *ngIf="loading">
+    <ion-item *ngFor="let row of dataSource.currentData">
+      &lt;!&ndash;<ion-skeleton-text width="40px"></ion-skeleton-text>&ndash;&gt;
+      <h1>Fake</h1>
+    </ion-item>
+  </ion-list>-->
+
+  <!--<ion-fab right bottom class="visible-xs visible-sm">
     <button ion-fab color="light"><ion-icon name="arrow-dropleft"></ion-icon></button>
     <ion-fab-list side="left">
-      <button ion-fab color="accent" (click)="dataSource.createNew()"><ion-icon name="md-add"></ion-icon></button>
+      <button ion-fab color="accent" (click)="openTripDialog()"><ion-icon name="md-add"></ion-icon></button>
     </ion-fab-list>
+  </ion-fab>-->
+
+  <ion-fab right bottom>
+    <button ion-fab color="light" (click)="openTripModal()"><ion-icon name="md-add"></ion-icon></button>
   </ion-fab>
 </ion-content>

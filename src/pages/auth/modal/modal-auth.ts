@@ -1,41 +1,39 @@
-import { Component } from '@angular/core';
-import {MenuController, ViewController} from 'ionic-angular';
-import { FormBuilder, FormGroup, Validators, AbstractControl } from '@angular/forms';
-import {ActivatedRoute, Router} from "@angular/router";
-import {AuthForm} from "../form/form-auth";
-import {WalletService} from "../../../services/wallet-service";
-
-/**
- * Generated class for the AuthPage page.
- *
- * See https://ionicframework.com/docs/components/#navigation for more info on
- * Ionic pages and navigation.
- */
+import { Component, ViewChild } from '@angular/core';
+import {ViewController} from 'ionic-angular';
+import {AccountService} from "../../../services/account-service";
+import { AuthForm } from '../form/form-auth';
 
 @Component({
   selector: 'modal-auth',
   templateUrl: 'modal-auth.html',
 })
-export class AuthModalPage {
+export class AuthModal {
 
-  constructor(private router: Router,
-              private wallet: WalletService,
+  loading: boolean = false;
+  error: string;
+
+  @ViewChild('form') private form: AuthForm;
+
+  constructor(private accountService: AccountService,
               public viewCtrl: ViewController) {
   }
 
   cancel() {
-    console.log('cancelled');
     this.viewCtrl.dismiss();
   }
 
-  onAuth(data) {
+  doSubmit(): Promise<any> | void {
+    if (!this.form.valid) return;
+    this.loading = true;
 
-    this.wallet.login({
-      authData: data
-    });
-
-    this.viewCtrl.dismiss();
-
-    this.router.navigate(['trips']);
+    return this.accountService.login(this.form.value)
+      .then((account) => {
+        console.log("Will close auth modal");
+        this.viewCtrl.dismiss(account);
+      })
+      .catch(err => {
+        this.loading = false;
+        this.form.error = err && err.message || err;
+      });
   }
 }

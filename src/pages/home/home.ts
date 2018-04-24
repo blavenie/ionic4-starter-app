@@ -1,22 +1,57 @@
-import {Component, OnInit} from '@angular/core';
+import {Component, OnDestroy} from '@angular/core';
 import {DatePipe} from "@angular/common";
+import { ActivatedRoute } from '@angular/router';
+import { ModalController } from 'ionic-angular';
+import { RegisterModal } from '../register/modal/modal-register';
+import { Subscription } from 'rxjs';
+import { AccountService } from '../../services/account-service';
+import { Account  } from '../../services/model';
 
 
 @Component({
   selector: 'page-home',
   templateUrl: 'home.html'
 })
-export class HomePage implements OnInit {
+export class HomePage implements OnDestroy {
 
   bgImage: String;
+  displayName: String = '';
+  isLogin: boolean;
+  subscriptions: Subscription[] = [];
 
-  constructor() {
+  constructor(
+    public accountService: AccountService,
+    public activatedRoute: ActivatedRoute,
+    public modalCtrl: ModalController
+  ) {
     this.bgImage = this.getRandomImage();
-    console.log('[home] bgimage=', this.bgImage);
+    this.isLogin = accountService.isLogin();
+    if (this.isLogin) {
+      this.onLogin(this.accountService.account);
+    }
+
+    // Subscriptions
+    this.subscriptions.push(this.accountService.onLogin.subscribe(account => this.onLogin(account)));
+    this.subscriptions.push(this.accountService.onLogout.subscribe(() => this.onLogout()));
   };
 
-  ngOnInit() {
-    console.debug('[home] init page');
+  ngOnDestroy() {
+    this.subscriptions.forEach(s => s.unsubscribe());
+    this.subscriptions = [];
+  }
+
+  onLogin(account: Account) {
+    console.log('[home] Logged account: ', account);
+    this.isLogin = true;
+    this.displayName = account && 
+    ((account.firstName && (account.firstName + " ") || "") +
+    (account.lastName || "")) || "";
+  }
+
+  onLogout() {
+    console.log('[home] Logout');
+    this.isLogin = false;
+    this.displayName = "";
   }
 
   getRandomImage() {
@@ -38,8 +73,8 @@ export class HomePage implements OnInit {
       kind = 'ray';
     }
     else {
-      const day = datePipe.transform(now, 'D');
-      const month = datePipe.transform(now, 'M');
+      const day = parseInt(datePipe.transform(now, 'D'));
+      const month = parseInt(datePipe.transform(now, 'M'));
       if ((month < 3) || (month == 3 && day < 21) || (month == 12 && day >= 21)) {
         kind = 'winter';
       }
@@ -57,6 +92,15 @@ export class HomePage implements OnInit {
     if (imageCount == 0) return this.getRandomImage();
     var imageIndex = Math.floor(Math.random()*imageCount)+1;
     return './assets/img/bg/'+kind+'-' + imageIndex +'.jpg';
+  }
+
+  register() {
+    let modal = this.modalCtrl.create(RegisterModal);
+    modal.present();
+  }
+
+  logout(event: any) {
+    this.accountService.logout();
   }
 
 }

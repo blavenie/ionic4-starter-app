@@ -4,45 +4,116 @@
     "DATE_PATTERN": "YYYY-MM-DD"
   },
   "COMMON": {
-    "BTN_CANCEL": "Cancel",
-    "BTN_ADD": "Add",
-    "BTN_EDIT": "Edit",
-    "BTN_DELETE": "Delete",
-    "BTN_VALIDATE": "Validate",
+    "BTN_CANCEL": "Annuler",
+    "BTN_ADD": "Ajouter",
+    "BTN_EDIT": "Modifier",
+    "BTN_DELETE": "Supprimer",
+    "BTN_VALIDATE": "Valider",
     "BTN_SAVE": "Sauvegarder",
-    "BTN_FILTER": "Filtrer"
-
+    "BTN_FILTER": "Filtrer",
+    "BTN_RELOAD": "Mettre à jour",
+    "BTN_REFRESH": "Rafraichir",
+    "BTN_SEARCH": "Rechercher",
+    "BTN_NEXT": "Suivant",
+    "BTN_BACK": "Retour",
+    "BTN_SEND": "Envoyer"
   },
   "MENU": {
-    "HOME": "Home",
-    "TRIPS": "Trips"
+    "HOME": "Accueil",
+    "TRIPS": "Marée",
+    "USERS": "Utilisateurs",
+    "FOOTER_VERSION_ABOUT": "v{{version}} | à propos",
+    "BTN_ACCOUNT": "Compte",
+    "BTN_LOGOUT": "Quitter"
   },
   "HOME": {
-    "WELCOME": "Welcome to the SUMARiS web site!",
-    "DESCRIPTION": "Completed skate stocks shared database.",
-    "BTN_TRIPS": "Search trips",
-    "BTN_REGISTER": "Register"
-  },
-  "PROFILE": {
-    "PROFILE_ADMIN": "Administrator",
-    "BTN_EDIT": "Edit Profile",
-    "BTN_LOG_OUT": "Log Out"
+    "WELCOME": "Bienvenue sur le portail SUMARiS !",
+    "DESCRIPTION": "Base de données européenne partagée<br/>pour la gestion des stocks de raies.",
+    "BTN_TRIPS": "Recherche de marées",
+    "NOT_THIS_ACCOUNT_QUESTION": "Vous n'êtes pas <b>{{displayName}}</b> ?",
+    "BTN_DISCONNECT": "Déconnecter ce compte",
+    "BTN_MY_ACCOUNT": "Mon compte"
   },
   "AUTH": {
-    "TITLE": "Authentication"
+    "TITLE": "Authentification",
+    "BTN_LOGIN": "Se connecter",
+    "BTN_REGISTER": "Créer un compte",
+    "NO_ACCOUNT_QUESTION": "Vous n'avez pas encore de compte ?"
+  },
+  "REGISTER": {
+    "TITLE": "Inscription",
+    "STEP_EMAIL": "Email",
+    "STEP_PASSWORD": "Mot de passe",
+    "STEP_USER_DETAILS": "Détail",
+    "CONFIRM_EMAIL": "Email (confirmation)",
+    "CONFIRM_PASSWORD": "Mot de passe (confirmation)",
+    "CONFIRMED": {
+      "TITLE": "Inscription confirmée !",
+      "DESCRIPTION": "Votre email a été validée avec succès. Votre inscription est maintenant <b>terminée</b> !",
+      "LOGIN_HELP": "Pour vous connecter, <b>cliquez ci-dessous</b> :"
+    },
+    "ERROR": {
+      "NOT_SAME_EMAIL": "Les emails ne correspondent pas",
+      "NOT_SAME_PASSWORD": "Les mots de passe ne correspondent pas",
+      "EMAIL_ALREADY_REGISTERED": "Email déjà enregistrée"
+    }
+  },
+  "USER": {
+    "TITLE": "Uilisateur",
+    "EMAIL": "Email",
+    "PASSWORD": "Mot de passe",
+    "FIRST_NAME": "Prénom",
+    "LAST_NAME": "Nom",
+    "PROFILE": {
+      "PROFILE_ADMIN": "Administrateur",
+      "PROFILE_OBSERVER": "Observateur",
+      "PROFILE_USER": "Utilisateur"
+    }
+  },
+  "USERS": {
+    "TITLE": "Uilisateurs",
+    "FILTER": {
+      "TITLE": "Options de recherche :",
+      "SEARCH": "Recherche"
+    }
   },
   "TRIPS": {
-    "TITLE": "Fishing trips"
+    "TITLE": "Marées",
+    "FILTER": {
+      "TITLE": "Options de recherche :",
+      "START_DATE": "Date de début",
+      "END_DATE": "Date de fin"
+    }
   },
   "TRIP": {
-    "TITLE": "Fishing trip",
-    "DEPARTURE_DATE_TIME": "Departure date",
-    "DEPARTURE_LOCATION": "Departure harbour",
-    "RETURN_DATE_TIME": "Return date",
-    "RETURN_LOCATION": "Return harbour",
-    "COMMENTS": "Comments"
+    "TITLE": "Marée",
+    "DEPARTURE_DATE_TIME": "Date de départ",
+    "DEPARTURE_LOCATION": "Port de départ",
+    "RETURN_DATE_TIME": "Date de retour",
+    "RETURN_LOCATION": "Port de retour",
+    "COMMENTS": "Commentaires",
+    "NEW": {
+      "TITLE": "Nouvelle marée"
+    },
+    "EDIT": {
+      "TITLE": "Modifier la marée"
+    }
   },
   "ERROR": {
-    "FIELD_REQUIRED": "This field is required"
+    "FIELD_REQUIRED": "Champ obligatoire.",
+    "FIELD_TOO_SHORT": "Valeur trop courte.",
+    "FIELD_TOO_SHORT_WITH_LENGTH": "Valeur trop courte ({{minLength}} caractères min)",
+    "FIELD_TOO_LONG": "Valeur trop longue",
+    "FIELD_TOO_LONG_WITH_LENGTH": "Valeur trop longue ({{maxLength}} caractères max)",
+    "FIELD_MIN": "Valeur minimale : {{min}}",
+    "FIELD_MAX": "Valeur maximale : {{max}}",
+    "FIELD_NOT_VALID_EMAIL": "Addresse email non valide",
+    "SPACE_NOT_ALLOW": "Espaces ou caractères spéciaux non autorisés",
+    "SCRYPT_ERROR": "Erreur de clefs d'ouverture du compte",
+    "UNKNOWN_ACCOUNT_EMAIL": "Aucun compte ne correspond à cet email.",
+    "BAD_PASSWORD": "Mot de passe incorrect.",
+    "EMAIL_ALREADY_REGISTERED": "Email déjà enregistrée",
+    "UNKNOWN_NETWORK_ERROR": "Erreur de communication avec le serveur.<br/>Si le problème persiste, veuillez contacter votre administrateur.",
+    "LOAD_ACCOUNT_ERROR": "Erreur de chargement du compte utilisateur.<br/>Si le problème persiste, veuillez contacter votre administrateur."
   }
 }

@@ -1,9 +1,10 @@
 
+import "./vendor";
+
 import {APP_BASE_HREF} from "@angular/common";
 import {BrowserModule} from "@angular/platform-browser";
 import {ErrorHandler, NgModule} from "@angular/core";
 import {IonicApp, IonicErrorHandler, IonicModule} from "ionic-angular";
-import {RouterModule, Routes} from "@angular/router";
 import {SplashScreen} from "@ionic-native/splash-screen";
 import {StatusBar} from "@ionic-native/status-bar";
 import {Keyboard} from "@ionic-native/keyboard";
@@ -14,19 +15,35 @@ import {ApolloModule, Apollo} from "apollo-angular";
 import {TranslateModule, TranslateService, TranslateLoader} from "@ngx-translate/core";
 import {TranslateHttpLoader} from "@ngx-translate/http-loader";
 import {ToolbarComponent} from "./toolbar/toolbar";
+import {ReactiveFormsModule} from "@angular/forms";
+
+
+import {AppRoutingModule} from './app-routing.module';
 import {AppMaterialModule} from "./material/material.module";
 import {AuthGuard} from "../services/auth-guard";
 import {AuthForm} from "../pages/auth/form/form-auth";
-import {AuthModalPage} from "../pages/auth/modal/modal-auth";
-import {WalletService} from "../services/wallet-service";
+import {AuthModal} from "../pages/auth/modal/modal-auth";
+import {AccountService} from "../services/account-service";
 import {TripService} from "../services/trip-service";
-import {UserService} from "../services/user-service";
+import {PersonService} from "../services/person-service";
+import {CryptoService} from "../services/crypto-service";
 import {MyApp} from "./app.component";
 import {HomePage} from "../pages/home/home";
+import {RegisterConfirmPage} from "../pages/register/confirm/confirm";
+import {UsersPage} from "../pages/users/users";
 import {TripPage} from "../pages/trip/trip";
+import {TripForm} from "../pages/trip/form/form-trip";
+import {TripModal} from "../pages/trip/modal/modal-trip";
 import {TripsPage} from "../pages/trips/trips";
 import {TripValidatorService} from "../pages/trips/validator/validators";
 import {AutofocusDirective} from "../directives/autofocus/autofocus.directive";
+import {MAT_DATE_FORMATS, DateAdapter} from "@angular/material";
+import {RegisterForm} from "../pages/register/form/form-register";
+import {RegisterModal} from "../pages/register/modal/modal-register";
+import { PersonValidatorService } from "../pages/users/validator/validators";
+
+const conf = require('../lib/conf.js')
+
 
 // Cordova plugins
 
@@ -48,43 +65,34 @@ export function createTranslateLoader(http: HttpClient) {
 
 
 
-const routes: Routes = [
-  {
-    path: '',
-    component: HomePage,
-    data: { title: 'Titre 1' }
-  },
-  {
-    path: 'trips',
-    component: TripsPage,
-    data: { title: 'Trips title' },
-    canActivate:[AuthGuard]
-  },
-  {
-    path: 'trip/:id',
-    component: TripPage,
-    data: { title: 'Titre 2' }
-  }
-];
-
 
 @NgModule({
   declarations: [
     MyApp,
+    ToolbarComponent,
     HomePage,
+    // Directives
+    AutofocusDirective,
+    // Auth & Register
+    AuthForm,
+    AuthModal,
+    RegisterForm,
+    RegisterModal,
+    RegisterConfirmPage,
+    // Users
+    UsersPage,
+    // Data
+    TripForm,
     TripPage,
     TripsPage,
-    ToolbarComponent,
-    AuthForm,
-    AuthModalPage,
-    // Directives
-    AutofocusDirective
+    TripModal
   ],
   imports: [
     BrowserModule,
     HttpClientModule,
     HttpLinkModule,
     ApolloModule,
+    ReactiveFormsModule,
     IonicModule.forRoot(MyApp),
     TranslateModule.forRoot({
       loader: {
@@ -93,52 +101,87 @@ const routes: Routes = [
         deps: [HttpClient]
       }
     }),
-    RouterModule.forRoot(routes, {
-      onSameUrlNavigation: 'reload'
-    }),
-    AppMaterialModule
+    AppMaterialModule,
+    AppRoutingModule
   ],
   bootstrap: [IonicApp],
   entryComponents: [
-    MyApp,
-    HomePage,
-    TripPage,
-    TripsPage,
-    ToolbarComponent,
-    AuthForm,
-    AuthModalPage
+    TripModal,
+    AuthModal,
+    RegisterModal
   ],
   providers: [
     StatusBar,
     SplashScreen,
     Keyboard,
     AuthGuard,
-    {provide: APP_BASE_HREF, useValue: '/#'},
+    {provide: APP_BASE_HREF, useValue: '/'},
     {provide: ErrorHandler, useClass: IonicErrorHandler},
-    WalletService,
-    UserService,
+    {provide: MAT_DATE_FORMATS, useValue: {
+        parse: {
+          dateInput: 'DD/MM/YYYYTHH:MM:SSZ'
+        },
+        display: {
+          dateInput: 'DD/MM/YYYY HH:MM',
+          monthYearLabel: undefined,
+          dateA11yLabel: '',
+          monthYearA11yLabel: ''
+        }
+    }},
+    // Common services
+    CryptoService,
+    AccountService,
+    // Users services
+    PersonService,
+    PersonValidatorService,
+    // Data services
     TripValidatorService,
     TripService
   ]
 })
 export class AppModule {
+
   constructor(
     apollo: Apollo,
     httpLink: HttpLink,
-    translate: TranslateService
+    translate: TranslateService,
+    adapter: DateAdapter<any>
   ) {
+    console.info("[app] Creating app module...");
     apollo.create({
-
-      //link: httpLink.create({ uri: 'http://localhost:4000/graphql' }),
-      link: httpLink.create({ uri: 'http://localhost:7777/graphql' }),
-      cache: new InMemoryCache()
+      link: httpLink.create({ uri: conf.baseUrl + '/graphql' }),
+      cache: new InMemoryCache({
+        /*dataIdFromObject: object => {
+          switch (object.__typename) {
+            case 'foo': return object.key; // use `key` as the primary key
+            case 'bar': return `bar:${object.blah}`; // use `bar` prefix and `blah` as the primary key
+            default: 
+             let key  = defaultDataIdFromObject(object);
+              console.log("dataIdFromObject", object, object.__typename, key);
+              return key; // fall back to default handling
+          }
+        }*/
+      })
     });
+
+    const defaultLocale = 'en';
+    var lang = translate.getBrowserLang();
+    if (lang != 'en' && lang != 'fr') {
+      lang = defaultLocale;
+    }
 
     // this language will be used as a fallback when a translation isn't found in the current language
     translate.setDefaultLang('en');
 
     // the lang to use, if the lang isn't available, it will use the current loader to get them
-    translate.use('en');
+    translate.use(lang);
+
+    translate.onLangChange.subscribe(event => {
+      if (event && event.lang) {
+        console.debug('[app] Use locale [' +  event.lang + ']');
+        adapter.setLocale(event.lang);
+      }
+    });
+
   }
 }
-

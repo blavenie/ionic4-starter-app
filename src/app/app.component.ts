@@ -7,7 +7,10 @@ import { Keyboard } from '@ionic-native/keyboard';
 
 
 import {Router} from "@angular/router";
-import {WalletService} from "../services/wallet-service";
+import {Account} from "../services/model";
+import {AccountService} from "../services/account-service";
+
+const conf = require('../lib/conf.js')
 
 export interface MenuItem {
   title: string;
@@ -16,19 +19,27 @@ export interface MenuItem {
 }
 
 @Component({
-  templateUrl: 'app.html'
+  templateUrl: 'app.component.html'
 })
 export class MyApp {
 
+  private isLogin: boolean;
+  private account: Account;
+  private appMenuItems: Array<MenuItem> =  [
+    {title: 'MENU.HOME', path: '/', icon: 'home'},
+    {title: 'MENU.TRIPS', path: '/trips', icon: 'pin'},
+    {title: 'MENU.USERS', path: '/users', icon: 'people'}
+  ];
+
+  appVersion: String = conf.version;
+
   @ViewChild(Nav) nav: Nav;
-  isLogin: boolean = false;
-  user: any;
-  appMenuItems: Array<MenuItem>;
 
   constructor(platform: Platform, statusBar: StatusBar, splashScreen: SplashScreen, keyboard: Keyboard,
-              private wallet: WalletService,
+              private accountService: AccountService,
               private router: Router,
               public menu: MenuController) {
+
 
     platform.ready().then(() => {
       // Okay, so the platform is ready and our plugins are available.
@@ -41,38 +52,35 @@ export class MyApp {
       //*** Control Keyboard
       keyboard.disableScroll(true);
 
+      this.isLogin = accountService.isLogin();
+      if (this.isLogin) {
+        this.onLogin(this.accountService.account);
+      }      
 
-      this.isLogin = this.wallet.isLogin();
-      this.wallet.onLogin.subscribe(event => this.onLogin(event));
-      this.wallet.onLogout.subscribe(event => this.onLogout());
+      // subscriptions
+      this.accountService.onLogin.subscribe(account => this.onLogin(account));
+      this.accountService.onLogout.subscribe(() => this.onLogout());
+
     });
-
-    this.appMenuItems = [
-      {title: 'MENU.HOME', path: '/', icon: 'home'},
-      {title: 'MENU.TRIPS', path: '/trips', icon: 'pin'}
-    ];
-
   }
 
-  onLogin(data): void {
-    console.log(data);
-    this.user = data;
+  onLogin(account: Account) {
+    console.log('[app] Logged account: ', account);
+    this.account = account;
     this.isLogin = true;
   }
 
-  onLogout(): void {
+  onLogout() {
     console.log("[app] logout");
     this.isLogin = false;
-    this.user = null;
+    this.account = null;
     this.router.navigate(['']);
   }
 
   logout(): void {
-    this.user = null;
-    this.wallet.logout();
+    this.account = null;
+    this.accountService.logout();
   }
-
-
 
   openPage(page): void {
     // close the menu when clicking a link from the menu

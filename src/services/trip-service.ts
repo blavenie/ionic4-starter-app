@@ -1,44 +1,29 @@
-import {Injectable,} from "@angular/core";
-import {WalletService} from "./wallet-service"
+import {Injectable} from "@angular/core";
 import gql from "graphql-tag";
-import {Apollo, ApolloBase} from "apollo-angular";
-import {ApolloQueryResult, WatchQueryOptions} from 'apollo-client';
-import { QueryRef } from 'apollo-angular';
-import { FetchResult } from 'apollo-link';
-import {Observable} from "rxjs";
-import {DateTime} from "ionic-angular";
-import {Referential} from "./referential-service";
+import {Apollo} from "apollo-angular";
+import {ApolloQueryResult} from "apollo-client";
+import {Observable, Subject} from "rxjs";
+import {Trip} from "./model";
+import {DataService} from "./data-service";
+import {map} from "rxjs/operators";
+import { Moment } from "moment";
 
-
-export class Trip {
-  id: number;
-  departureDateTime: DateTime;
-  returnDateTime: Date;
-  comments: string;
-  updateDate: DateTime;
-  creationDate: DateTime;
-  departureLocation: Referential;
-  returnLocation: Referential;
-  recorderDepartment: Referential;
-  vessel: Referential;
-  vesselId: number;
-  constructor() {
-    this.departureLocation = {};
-    this.returnLocation = {};
-  }
+export declare class TripFilter {
+  startDate: Date|Moment;
+  endDate: Date|Moment;
 }
-export declare type TripResult = {
+export declare class TripsVariables extends TripFilter {
+  offset: number;
+  size: number;
+  sortBy?: string;
+  sortDirection?: string;
+};
+export declare type TripsResult = {
   trips: Trip[];
 }
-export declare class TripFilter {
-  startDate: Date;
-  endDate: Date;
-}
-
-
 const Trips = gql`
-  query Trips($offset: Int, $size: Int, $sortBy: String, $sortDirection: String){
-    trips(offset: $offset, size: $size, sortBy: $sortBy, sortDirection: $sortDirection){
+  query Trips($startDate: Date, $offset: Int, $size: Int, $sortBy: String, $sortDirection: String){
+    trips(filter: {startDate: $startDate}, offset: $offset, size: $size, sortBy: $sortBy, sortDirection: $sortDirection){
       id
       departureDateTime
       returnDateTime
@@ -68,70 +53,80 @@ const SaveTrips = gql`
   mutation saveTrips($trips:[TripVOInput]){
     saveTrips(trips: $trips){
       id
+      updateDate
     }
   }
 `;
 
 @Injectable()
-export class TripService {
-
-  public data:any = {};
+export class TripService implements DataService<Trip, TripFilter>{
 
   constructor(
-    private apollo: Apollo,
-    private wallet: WalletService
+    private apollo: Apollo
   ) {
-    this.resetData();
-    this.wallet.onLogin.subscribe(event => this.onLogin(event));
-    this.wallet.onLogout.subscribe(event => this.onLogout());
   }
 
-  private resetData() {
-
-  }
-
-  private onLogin(data): void {
-    // TODO user data ?
-  }
-
-  private onLogout(): void {
-    this.resetData();
-  }
-
-  getTrips(options): Observable<ApolloQueryResult<Trip>> {
-    const variables = {
-      offset: options && options.offset || 0,
-      size: options && options.size || 100,
-      sortBy: options && options.sortBy || "departureDateTime",
-      sortDirection: options && options.sortDirection || "asc"
+  loadAll(offset: number,
+          size: number,
+          sortBy?: string,
+          sortDirection?: string,
+          filter?: TripFilter): Observable<Trip[]> {
+    const variables: TripsVariables = {
+      startDate: filter && filter.startDate || null,
+      endDate: filter && filter.endDate || null,
+      offset: offset || 0,
+      size: size || 100,
+      sortBy: sortBy || 'departureDateTime',
+      sortDirection: sortDirection || 'asc'
     };
-    let obTrips: QueryRef<Trip> = this.apollo.watchQuery<Trip>({
+    console.debug("[trip-service] Getting trips using options:", variables);
+    this.apollo.getClient().cache.reset();
+    return this.apollo.query<ApolloQueryResult<TripsResult>, TripsVariables>({
       query: Trips,
       variables: variables
-    });
-    return obTrips.valueChanges;
+    })
+    .pipe(
+      map(
+        ({data}) => (data && data['trips'] || []).map(t => {
+          const res = new Trip();
+          res.fromObject(t);
+          return res;
+        })));
   }
 
-  saveTrips(trips: Trip[]): Observable<FetchResult<Trip>> {
-    const tripsToSave = trips && trips
-      //.filter(t => !t || !t.id || t.id < 0)
+  saveAll(data: Trip[]): Observable<Trip[]> {
+
+    console.debug("[trip-service] Saving trips: ", data);
+
+    let tripsToSave = data && data
       .map(t => {
-        return {
-          departureDateTime: t.departureDateTime || t.returnDateTime,
-          returnDateTime: t.returnDateTime || t.departureDateTime,
-          departureLocation: {id: t.departureLocation.id||t.returnLocation.id},
-          returnLocation: {id:t.returnLocation.id||t.departureLocation.id},
-          recorderDepartment: {id: t.recorderDepartment && t.recorderDepartment.id || 1},
-          vesselId: t.vessel && t.vessel.id || 1,
-          creationDate: t.creationDate
-        };
+        const copy:any = t.asObject();
+        copy.departureDateTime = copy.departureDateTime || copy.returnDateTime;
+        copy.returnDateTime = copy.returnDateTime || copy.departureDateTime;
+        //copy.departureLocation.id = copy.departureLocation.id || copy.returnLocation.id;
+        //copy.returnLocation.id = copy.returnLocation.id || copy.departureLocation.id;
+        copy.recorderDepartment.id = copy.recorderDepartment.id || 1; // FIXME make
+        copy.vesselId = copy.vesselId || copy.vessel && copy.vessel.id;
+        delete copy.vessel;
+        return copy;
       });
 
-    return this.apollo.mutate({
-      mutation: SaveTrips,
-      variables: {
-        trips: tripsToSave
-      }
-    });
+    let subject = new Subject<Trip[]>();
+
+    let subscription = this.apollo.mutate({
+        mutation: SaveTrips,
+        variables: {
+          trips: tripsToSave
+        }
+      })
+      .subscribe(({data}) => {
+        data && data['saveTrips'] && tripsToSave.forEach(t => {
+          const res = data.saveTrips.find(res => res.id == t.id);
+          t.updateDate = res && res.updateDate || t.updateDate;
+        });
+        subject.next(tripsToSave);
+        subscription.unsubscribe();
+      });
+    return subject.asObservable();
   }
 }

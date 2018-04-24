@@ -1,21 +1,50 @@
+   
+<form [formGroup]="form" novalidate (ngSubmit)="doSubmit($event, form.value)">
 
+  <!-- Username -->
+  <mat-form-field>
+    <input matInput
+          [appAutofocus]="true"
+          [autofocusDelay]="500"
+          [placeholder]="'USER.EMAIL'|translate"
+          formControlName="username"
+          autocomplete="section-red username">
+    <mat-error *ngIf="form.controls.username.hasError('required') && form.controls.username.dirty" translate>ERROR.FIELD_REQUIRED</mat-error>
+    <mat-error *ngIf="form.controls.username.hasError('email') && form.controls.username.dirty">
+        <span>{{'ERROR.FIELD_NOT_VALID_EMAIL' | translate }}</span>
+    </mat-error>
+  </mat-form-field>
 
-  <form [formGroup]="authForm" (ngSubmit)="onSubmit($event, authForm.value)">
-    <ion-item>
-      <ion-label floating>Username</ion-label>
-      <ion-input formControlName="username" type="text"></ion-input>
-    </ion-item>
+  <!-- Password -->
+  <mat-form-field>
+    <input 
+        matInput 
+        [placeholder]="'USER.PASSWORD'|translate"
+        formControlName="password" 
+        autocomplete="section-red current-password"
+        type="password">
+    <mat-error *ngIf="form.controls.password.hasError('required') && form.controls.password.touched" translate>ERROR.FIELD_REQUIRED</mat-error>
+  </mat-form-field>
 
-    <ion-item [ngClass]="{'error-border':!authForm.controls.password.valid && authForm.controls.password.touched}">
-      <ion-label floating>Password</ion-label>
-      <ion-input formControlName="password" type="password"></ion-input>
-    </ion-item>
-    <ion-item *ngIf="authForm.controls.password.hasError('required') && authForm.controls.password.touched">
-      <p>Sorry, field password is required!</p>
-    </ion-item>
-    <ion-item *ngIf="authForm.controls.password.hasError('minlength') && authForm.controls.password.touched">
-      <p>Sorry, minimum password length is 8!</p>
-    </ion-item>
+  <p ion-text color="danger" *ngIf="error && !loading" [innerHTML]="error|translate"></p>
 
-    <button ion-button full color="primary" [disabled]="!authForm.valid" style="margin-top: 20px;" type="submit">Authorize</button>
-  </form>
+  <div class="hidden-xs hidden-sm padding bar" style="text-align: right;">
+
+    <button mat-button (click)="onCancel.emit()" type="button" [disabled]="loading">
+      {{'COMMON.BTN_CANCEL'|translate}}
+    </button>
+
+    <button mat-raised-button color="primary" type="submit" [disabled]="loading">
+      {{'AUTH.BTN_LOGIN'|translate}}
+    </button>
+  </div>
+</form>
+
+<!-- Not register yet ? -->
+<p class="padding" style="text-align: center;">
+  <span translate>AUTH.NO_ACCOUNT_QUESTION</span>
+  <br/>
+  <a href="#" (click)="register()">
+    <span translate>AUTH.BTN_REGISTER</span>
+  </a>
+</p>

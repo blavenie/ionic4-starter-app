@@ -1,44 +1,31 @@
 import {Injectable} from "@angular/core";
-import {WalletService} from "./wallet-service";
-import {Apollo} from "apollo-angular";
-import {ApolloQueryResult} from "apollo-client";
 import {Observable} from "rxjs";
+import {Referential} from "./model";
+import {DataService} from "./data-service";
 
 
-export declare class Referential {
-  id: number;
-  label: string;
-  name: string;
+export declare class ReferentialFilter {
+  type: string;
 }
 
 @Injectable()
-export class ReferentialService {
-
-  public data:any = {};
+export class ReferentialService implements DataService<Referential, ReferentialFilter>{
 
   constructor(
-    private apollo: Apollo,
-    private wallet: WalletService
   ) {
-    this.resetData();
-
-    this.wallet.onLogin.subscribe(event => this.onLogin(event));
-    this.wallet.onLogout.subscribe(event => this.onLogout());
   }
 
-  private resetData() {
 
+  loadAll( offset: number,
+    size: number,
+    sortBy?: string,
+    sortDirection?: string,
+    filter?: ReferentialFilter): Observable<Referential[]> {
+
+    return Observable.empty();
   }
 
-  private onLogin(data): void {
-    // TODO user data ?
-  }
-
-  private onLogout(): void {
-    this.resetData();
-  }
-
-  getReferential(options): Observable<ApolloQueryResult<Referential>> {
-    return null;
+  saveAll(data: Referential[]): Observable<Referential[]> {
+    return Observable.empty();
   }
 }

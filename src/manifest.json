@@ -1,11 +1,11 @@
 {
-  "name": "Ionic",
-  "short_name": "Ionic",
+  "name": "SUMARiS",
+  "short_name": "SUMARiS",
   "start_url": "index.html",
   "display": "standalone",
   "icons": [{
     "src": "assets/img/logo.png",
-    "sizes": "512x512",
+    "sizes": "183x120",
     "type": "image/png"
   }],
   "background_color": "#4e8ef7",

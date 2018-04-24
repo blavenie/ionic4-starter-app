@@ -1,16 +1,15 @@
-import {ApolloQueryResult} from "apollo-client";
-import {FetchResult} from "apollo-link";
 import {Observable} from "rxjs";
 
-export declare class RemoteService<T> {
+export declare interface DataService<T, F> {
 
-  loadAll(options?: {
-    offset?: number;
-    size?: number;
-    sortBy?: string;
-    sortDirection?: string;
-  }): Observable<ApolloQueryResult<T>>;
+  loadAll(
+    offset: number,
+    size: number,
+    sortBy?: string,
+    sortDirection?: string,
+    filter?: F
+  ): Observable<T[]>;
 
-  saveAll(data: T[]): Observable<FetchResult<T>>;
+  saveAll(data: T[]): Observable<T[]>;
 
 }

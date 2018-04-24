@@ -2,37 +2,35 @@
   <ion-menu side="left" [content]="content">
     <ion-header>
       <ion-toolbar class="user-profile" color="">
-        <ion-title>
-          <img id="logo" src="./assets/img/logo-menu.png" [title]="'APP_NAME'|translate"/>
-
-        </ion-title>
-
-        <ion-grid [hidden]="!isLogin" *ngIf="isLogin" class="fade in">
+        <ion-grid >
           <ion-row>
-            <ion-col col-4>
-              <div class="user-avatar">
-                <img src="{{user?.avatar}}">
+            <ion-col col-4 [hidden]="!isLogin || !account?.avatar"  class="fade in">
+              <div class="user-avatar" [ngStyle]="{'background-image':'url('+(account?.avatar||'./assets/img/person.png')+')'}">
+                
               </div>
             </ion-col>
-            <ion-col padding-top col-8>
-              <h2 ion-text class="no-margin bold text-white">
-                {{user?.name}}
-              </h2>
-              <span ion-text color="light" *ngIf="user?.mainProfile">{{( 'PROFILE.PROFILE_'+user.mainProfile.toUpperCase()) | translate }}</span>
+            <ion-col col [class.align-right]="isLogin">
+              <img src="./assets/img/logo-menu.png" [title]="'APP_NAME'|translate"/>
             </ion-col>
           </ion-row>
+          <ion-row [hidden]="!isLogin" no-padding>
+            <h2 ion-text class="no-margin  bold text-white username">
+              {{account?.firstName}} {{account?.lastName}}
+            </h2>
+            <span ion-text color="light" >{{account?.email}}</span>
+          </ion-row>
 
-          <ion-row no-padding class="other-data">
+          <ion-row no-padding class="other-data" [hidden]="!isLogin"  class="fade in">
             <ion-col no-padding class="column">
               <button ion-button icon-left small full color="light" menuClose disabled>
                 <ion-icon name="contact"></ion-icon>
-                <span translate>PROFILE.BTN_EDIT</span>
+                <span translate>MENU.BTN_ACCOUNT</span>
               </button>
             </ion-col>
             <ion-col no-padding class="column">
               <button ion-button icon-left small full color="light" menuClose (click)="logout()">
                 <ion-icon name="log-out"></ion-icon>
-                <span translate>PROFILE.BTN_LOG_OUT</span>
+                <span translate>MENU.BTN_LOGOUT</span>
               </button>
             </ion-col>
           </ion-row>
@@ -42,7 +40,7 @@
       </ion-toolbar>
     </ion-header>
 
-    <ion-content color="dark" [class.has-profile-header]="isLogin">
+    <ion-content color="dark" [class.has-profile-header]="isLogin" [class.no-profile-header]="!isLogin">
 
       <ion-list class="user-list">
         <button ion-item menuClose class="text-1x" *ngFor="let menuItem of appMenuItems" routerLink="{{menuItem.path}}">
@@ -51,6 +49,15 @@
         </button>
       </ion-list>
     </ion-content>
+
+
+    <ion-footer>
+      <ion-toolbar style="text-align: center">
+        <span>
+          {{'MENU.FOOTER_VERSION_ABOUT'| translate: {version: appVersion} }}
+        </span>
+      </ion-toolbar>
+    </ion-footer>
 
   </ion-menu>
 

@@ -1,27 +1,51 @@
+<form class="form-container"
+      [formGroup]="form"
+      (ngSubmit)="onSubmit($event, form.value)">
 
-<mat-dialog-content [formGroup]="form">
+  <ion-item>
+    <mat-form-field>
+      <input matInput
+            [placeholder]="'TRIP.DEPARTURE_DATE_TIME'|translate"
+            [matDatepicker]="departureDatepicker"
+            formControlName="departureDateTime"
+            [ngModel]="data.departureDateTime">
+      <mat-datepicker-toggle matSuffix [for]="departureDatepicker">
+          <mat-icon matDatepickerToggleIcon>keyboard_arrow_down</mat-icon>
+      </mat-datepicker-toggle>
+      <mat-datepicker #departureDatepicker></mat-datepicker>
+      <mat-error *ngIf="form.controls.departureDateTime.hasError('required') && form.controls.departureDateTime.touched" translate>ERROR.FIELD_REQUIRED</mat-error>
+    </mat-form-field>
+  
+    <mat-form-field>
+      <input matInput
+              [placeholder]="'TRIP.DEPARTURE_LOCATION'|translate"
+              [matAutocomplete]="autoDepartureLocation"
+              formControlName="departureLocation">
+        <mat-error *ngIf="form.controls['departureLocation'].hasError('required')" translate>ERROR.FIELD_REQUIRED</mat-error>
+   </mat-form-field>
 
-  <mat-form-field>
-    <input matInput
-           [placeholder]="'TRIP.DEPARTURE_DATE_TIME'|translate"
-           [matDatepicker]="departureDatepicker"
-           appAutofocus="true"
-           formControlName="departureDateTime">
-    <mat-datepicker-toggle matSuffix [for]="departureDatepicker"></mat-datepicker-toggle>
-    <mat-datepicker #departureDatepicker></mat-datepicker>
-    <mat-error *ngIf="form.controls['departureDateTime'].hasError('required')" translate>ERROR.FIELD_REQUIRED</mat-error>
-  </mat-form-field>
+    <mat-autocomplete #autoDepartureLocation="matAutocomplete" [displayWith]="displayReferentialFn">
+      <mat-option *ngFor="let location of locations" [value]="location">
+          {{ location.label }} - {{ location.name }}
+      </mat-option>
+    </mat-autocomplete>
+  </ion-item>
 
-  <!--<mat-form-field>
-    <input matInput
-           placeholder="Course Description"
-           formControlName="description">
-  </mat-form-field>-->
+  <ion-item>
+    <mat-form-field>
+      <input matInput
+              [placeholder]="'TRIP.RETURN_DATE_TIME'|translate"
+              [matDatepicker]="returnDatepicker"
+              formControlName="returnDateTime"
+              [ngModel]="data.returnDateTime">
+      <mat-datepicker-toggle matSuffix [for]="returnDatepicker">
+          <mat-icon matDatepickerToggleIcon>keyboard_arrow_down</mat-icon>
+      </mat-datepicker-toggle>
+      <mat-datepicker #returnDatepicker></mat-datepicker>
+    </mat-form-field>
+  </ion-item>
 
-
-</mat-dialog-content>
-
-<mat-dialog-actions>
-  <button class="mat-raised-button"(click)="close()">Close</button>
-  <button class="mat-raised-button mat-primary"(click)="save()">Save</button>
-</mat-dialog-actions>
+  <button ion-button icon-left full color="primary" [disabled]="!form.valid" style="margin-top: 20px;" type="submit" >
+      {{'COMMON.BTN_SAVE'|translate}}
+  </button>
+</form>

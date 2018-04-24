@@ -1,39 +1,67 @@
 page-trips {
-  .mat-column-select {
-    overflow: initial;
-    max-width: 60px;
-  }
 
-  .mat-column-id {
-    max-width: 60px;
-  }
+  .mat-table {
+    .mat-column-select {
+      overflow: initial;
+      max-width: 60px;
+    }
 
-  .mat-column-progress {
-    max-width: 60px;
-  }
+    .mat-column-id {
+      max-width: 60px;
+    }
 
-  .mat-column-actionsColumn {
-    max-width: 100px;
-  }
+    .mat-column-progress {
+      max-width: 60px;
+    }
 
-  /*input.mat-input-element {
-    max-width: 60px;
-  }*/
+    .mat-column-actionsColumn {
+      max-width: 100px;
+    }
 
-  .mat-form-field-infix {
-    overflow: hidden;
-    word-wrap: break-word;
-    width: auto !important;
-    max-width: 150px;
-  }
+    /*input.mat-input-element {
+      max-width: 60px;
+    }*/
 
-  .mat-cell, .mat-header-cell {
-    overflow: hidden;
-    word-wrap: break-word;
-  }
+    .mat-input-element:disabled {
+      color: inherit;
+    }
 
-  .mat-row {
-    max-height: 44px;
-    padding: 0 0px;
+    .mat-form-field-infix {
+      overflow: hidden;
+      word-wrap: break-word;
+      width: auto !important;
+      max-width: 150px;
+    }
+
+    .mat-cell, .mat-header-cell {
+      //overflow: hidden;
+      //word-wrap: break-word;
+    }
+
+    .mat-header-row,
+    .mat-row{
+      max-height: 44px;
+      padding: 0 0px;
+    }
+
+    .mat-cell-date-time input {
+      max-width: 120px;
+    }
+
+    .mat-form-field-disabled .mat-form-field-underline {
+      background: none;
+    }
+
+    .mat-form-field-wrapper {
+      padding-bottom: 10px;
+    }
+
+    .mat-form-field-underline {
+      bottom: 10px;
+    }
+
+    .highlight{
+      background: #42A948; /* green */
+    }
   }
 }

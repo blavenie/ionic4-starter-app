@@ -15,8 +15,8 @@ export class ToolbarComponent {
   @Input()
   title: string = '';
 
- /* @Input()
-  color: string = '';*/
+  @Input()
+  color: string = '';
 
   constructor() {
   }

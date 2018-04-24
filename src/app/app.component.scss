@@ -27,21 +27,6 @@ body {
   user-select: text !important;
 }
 
-#logo {
-  /*
-  display: inline;
-  height: 46px;
-  position: relative;
-  top: 9px;
-  right: 3px;
-  */
-}
-
-#logo + span {
-  line-height: 45px;
-}
-
-
 .bg-image-cover {
   -webkit-background-size: cover;
   -moz-background-size: cover;
@@ -49,20 +34,6 @@ body {
   background-size: cover;
 }
 
-@media (min-width: 768px) {
-
-  .header-main {
-    margin-left: 270px;
-  }
-
-  ion-modal .header-main {
-    margin-left: 0 !important;
-  }
-
-  .bar-button-menutoggle-md {
-    display: none !important
-  }
-}
 
 ion-menu .scroll-content {
   overflow: hidden;
@@ -76,14 +47,6 @@ ion-content .scroll-content {
 [hidden] {
   display: none !important;
 }
-
-ion-menu .no-profile-header .scroll-content{
-  margin-top:56px !important;
-}
-ion-menu .has-profile-header .scroll-content{
-  margin-top:200px !important;
-}
-
 
 // --------------------------------------------------
 // Responsive: Utility classes
@@ -147,7 +110,7 @@ $screen-lg:                       1200px;
 }
 @media screen and (max-width: $screen-xs-max) {
   .padding-xs {
-    padding: 16px !important;
+    padding: 15px !important;
   }
 }
 @media screen and (min-width: $screen-sm) {
@@ -351,5 +314,122 @@ $screen-lg:                       1200px;
     -moz-user-select: auto !important;
     -ms-user-select: auto !important;
     user-select: auto !important;
+  }
+}
+
+
+// --------------------------------------------------
+// Global style responsive
+// --------------------------------------------------
+
+@media (min-width: $screen-sm) {
+
+  .header-main {
+    margin-left: 270px;
+  }
+
+  .bar-button-menutoggle-md {
+    display: none !important
+  }
+
+  ion-modal .header-main {
+    margin-left: 0 !important;
+  }
+}
+
+
+// --------------------------------------------------
+// Left menu
+// --------------------------------------------------
+
+ion-menu .no-profile-header .scroll-content{
+  margin-top: 79px !important;
+}
+ion-menu .has-profile-header .scroll-content{
+  margin-top:192px !important;
+}
+
+ion-menu .user-avatar {
+  color: #d9d9d9;
+  background-color: color($colors, primary);
+  -webkit-background-size: cover;
+  -moz-background-size: cover;
+  -o-background-size: cover;
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center;
+  border: solid 1px color($colors, light);
+  overflow: hidden!important;
+  font-size: 80px!important;
+  line-height: 80px;
+  height: 80px!important;
+  width: 80px!important;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+ion-menu .align-right {
+  text-align: right;
+}
+
+ion-menu {
+  h2.username {
+    padding-top: 0;
+    margin-top: 0;
+    margin-bottom: 0;
+  }
+}
+
+// --------------------------------------------------
+// table
+// --------------------------------------------------
+
+mat-cell .avatar {
+  color: #d9d9d9;
+  background-color: #f8f8f8;
+  border: solid 1px #d9d9d9;
+  overflow: hidden!important;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+// --------------------------------------------------
+// Forms
+// --------------------------------------------------
+
+mat-form-field {
+  mat-error {
+    text-align: right;    
+  }
+}
+
+// --- mat-stepper component
+
+mat-horizontal-stepper {
+  .mat-horizontal-stepper-header-container {
+    padding: 0;
+  }
+
+  .mat-horizontal-content-container {
+    padding: 0;
+  }
+}
+
+// Extra small device: Phones (<767px)
+@media screen and (max-width: $screen-xs-max) {
+  mat-horizontal-stepper {
+    .mat-horizontal-stepper-header-container {
+  
+      .mat-horizontal-stepper-header {
+        padding-left: 5px;
+      }
+      .mat-stepper-horizontal-line {
+        display: none;
+      }
+    }
+  
+    .mat-horizontal-content-container {
+      padding: 0;
+    }
   }
 }
