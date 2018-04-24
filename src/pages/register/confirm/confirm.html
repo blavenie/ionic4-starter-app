@@ -1,0 +1,38 @@
+<ion-content padding 
+             class="bg-image-cover center"
+             [ngStyle]="{'background-image': 'url('+bgImage+')'}">
+
+  <p class="hidden-xs">&nbsp;</p>
+
+  <div class="main-content">
+
+    <h4>
+      <ion-icon name="checkmark"></ion-icon>
+      <span translate>REGISTER.CONFIRMED.TITLE</span>
+    </h4>
+
+    <p ion-text [innerHTML]="'REGISTER.CONFIRMED.DESCRIPTION'|translate"></p>    
+
+    <p ion-text
+      *ngIf="!isLogin"
+     [innerHTML]="'REGISTER.CONFIRMED.LOGIN_HELP'|translate"></p>    
+
+    <br/>
+    <div>
+      <ion-spinner *ngIf="loading"></ion-spinner>
+
+      
+      <button ion-button icon-left full color="primary" [routerLink]="['/trips']" *ngIf="!isLogin && !loading">
+        <ion-icon name="log-in"></ion-icon>
+        <span translate>AUTH.BTN_LOGIN</span>
+      </button>
+
+      <button ion-button icon-left full color="light" [routerLink]="['/trips']" *ngIf="isLogin && !loading" disabled>
+        <ion-icon name="contact"></ion-icon>
+        <span translate>HOME.BTN_MY_ACCOUNT</span>
+      </button>
+      
+    </div>
+  </div>
+
+</ion-content>

@@ -1,0 +1,79 @@
+page-users {
+
+  .mat-table {
+    .mat-column-select {
+      overflow: initial;
+      max-width: 60px;
+    }
+
+    .mat-column-id {
+      max-width: 60px;
+    }
+
+    .mat-column-progress {
+      max-width: 60px;
+    }
+
+    .mat-column-actionsColumn {
+      max-width: 100px;
+    }
+
+    .mat-input-element:disabled {
+      color: inherit;
+    }
+
+    .mat-form-field-infix {
+      overflow: hidden;
+      word-wrap: break-word;
+      width: auto !important;
+      //max-width: 150px;
+    }
+
+    .mat-form-field {
+      width: 100%;
+      padding-right: 15px;
+    }
+
+    .mat-header-row,
+    .mat-row{
+      max-height: 44px;
+      padding: 0 0px;
+    }
+
+    .mat-form-field-disabled .mat-form-field-underline {
+      background: none;
+    }
+
+    .mat-form-field-wrapper {
+      padding-bottom: 10px;
+    }
+
+    .mat-form-field-underline {
+      bottom: 10px;
+    }
+
+    .highlight{
+      background: #42A948; /* green */
+    }
+
+    .mat-cell .avatar {
+      height: 40px;
+      width: 40px;
+      margin: 2px 0px 0px 0px;
+      -webkit-background-size: cover;
+      -moz-background-size: cover;
+      -o-background-size: cover;
+      background-size: cover;
+      background-repeat: no-repeat;
+      background-position: center;
+    }
+
+    .mat-column-avatar {
+      max-width: 50px;
+    }
+
+    .mat-column-select {
+      max-width: 30px;
+    }
+  }
+}

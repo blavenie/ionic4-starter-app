@@ -1,0 +1,48 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons left start>
+      <button ion-button 
+              *ngIf="form.isBeginning()"
+              (click)="cancel()" class="visible-xs visible-sm">
+        {{'COMMON.BTN_CANCEL'|translate}}
+      </button>
+      <button ion-button icon-only
+              *ngIf="!form.isBeginning()"
+              (click)="form.slidePrev()" 
+              class="visible-xs visible-sm">
+        <ion-icon name="arrow-back"></ion-icon>
+      </button>
+    </ion-buttons>
+      
+    <ion-title>
+      {{'REGISTER.TITLE'|translate}}
+    </ion-title>
+
+    <ion-buttons end>
+      <ion-spinner *ngIf="sending"></ion-spinner>
+
+      <button ion-button icon-right
+          *ngIf="!form.isEnd()"
+          (click)="form.slideNext()" 
+          class="visible-xs visible-sm">
+        {{'COMMON.BTN_NEXT' |translate}}
+        <ion-icon name="arrow-forward"></ion-icon>
+      </button>
+
+      <button ion-button icon-only 
+              *ngIf="form.isEnd() && !sending"
+              (click)="doSubmit()" 
+              class="visible-xs visible-sm">
+        <ion-icon name="send"></ion-icon>
+      </button>
+    </ion-buttons> 
+
+  </ion-toolbar>
+</ion-header>
+
+<ion-content padding>
+  <form-register (onSubmit)="doSubmit($event)" 
+                 (onCancel)="cancel()"
+                 #form>
+  </form-register>
+</ion-content>

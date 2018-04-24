@@ -1,0 +1,162 @@
+
+
+  
+
+   <mat-horizontal-stepper linear #stepper="matHorizontalStepper" >
+
+      <!-- Step 1: Username -->
+      <mat-step [stepControl]="forms[0]" *ngIf="forms[0].controls; let controls">
+
+        <form [formGroup]="forms[0]">
+          <ng-template matStepLabel>{{'REGISTER.STEP_EMAIL'|translate}}</ng-template>
+
+          <!-- Email -->
+          <mat-form-field >
+            <input matInput 
+                  [appAutofocus]="true"
+                  [autofocusDelay]="500"
+                  [placeholder]="'USER.EMAIL'|translate"
+                  formControlName="email"
+                  autocomplete="section-blue username email"
+                  >
+            <mat-error *ngIf="controls.email.hasError('required') && controls.email.dirty" translate>ERROR.FIELD_REQUIRED</mat-error>
+            <mat-error *ngIf="controls.email.hasError('email') && !controls.email.hasError('required') && controls.email.dirty">
+                <span>{{'ERROR.FIELD_NOT_VALID_EMAIL' | translate }}</span>
+            </mat-error>
+            <mat-error *ngIf="controls.email.hasError('availability') && controls.email.dirty" translate>REGISTER.ERROR.EMAIL_ALREADY_REGISTERED</mat-error>
+            
+          </mat-form-field>
+
+          <!-- Confirm Email -->
+          <mat-form-field >
+            <input matInput
+                  matFormFieldControl
+                  [placeholder]="'REGISTER.CONFIRM_EMAIL'|translate"
+                  formControlName="confirmEmail">
+            <mat-error *ngIf="forms[0].controls.confirmEmail.hasError('required') && forms[0].controls.confirmEmail.touched" translate>ERROR.FIELD_REQUIRED</mat-error>
+            <mat-error *ngIf="forms[0].controls.confirmEmail.hasError('equals') && forms[0].controls.confirmEmail.touched">
+                <span>{{'REGISTER.ERROR.NOT_SAME_EMAIL' | translate }}</span>
+            </mat-error>
+          </mat-form-field>
+
+          <!-- buttons -->
+          <ion-toolbar class="hidden-xs hidden-sm">
+            <button mat-button (click)="onCancel.emit()" type="button">
+              {{'COMMON.BTN_CANCEL'|translate}}
+            </button>
+        
+              <!--  [disabled]="!form.valid" -->
+            <button mat-raised-button color="primary" matStepperNext>
+              <span translate>COMMON.BTN_NEXT</span> 
+            </button>
+          </ion-toolbar>
+        </form>
+      </mat-step>
+    
+
+      <!-- Step 2: Password -->
+      <mat-step [stepControl]="forms[1]">
+
+          <form [formGroup]="forms[1]">
+
+            <ng-template matStepLabel>{{'REGISTER.STEP_PASSWORD'|translate}}</ng-template>
+
+            <!-- Password -->
+            <mat-form-field >
+              <input matInput 
+                    [placeholder]="'USER.PASSWORD'|translate"
+                    formControlName="password"
+                    autocomplete="section-red new-password"
+                    type="password"
+                    >
+              <mat-error *ngIf="forms[1].controls.password.hasError('required') && forms[1].controls.password.dirty" translate>ERROR.FIELD_REQUIRED</mat-error>
+              <mat-error *ngIf="forms[1].controls.password.hasError('minlength') && forms[1].controls.password.dirty">
+                  <span>{{'ERROR.FIELD_TOO_SHORT_WITH_LENGTH' | translate: {minLength: 8} }}</span>
+              </mat-error>
+            </mat-form-field>
+    
+            <!-- Confirm password -->
+            <mat-form-field >
+              <input matInput 
+                    [placeholder]="'REGISTER.CONFIRM_PASSWORD'|translate"
+                    formControlName="confirmPassword"
+                    autocomplete="section-red new-password"
+                    type="password"
+                    >
+              <mat-error *ngIf="forms[1].controls.confirmPassword.hasError('required') && forms[1].controls.confirmPassword.dirty" translate>ERROR.FIELD_REQUIRED</mat-error>
+              <mat-error *ngIf="forms[1].controls.confirmPassword.hasError('equals') && forms[1].controls.confirmPassword.dirty">
+                  <span>{{'REGISTER.ERROR.NOT_SAME_PASSWORD' | translate }}</span>
+              </mat-error>
+            </mat-form-field>
+    
+            <!-- buttons -->
+            <ion-toolbar class="hidden-xs hidden-sm">
+                <button mat-button icon-left matStepperPrevious>
+                  <ion-icon name="arrow-back"></ion-icon>
+                  <span translate>COMMON.BTN_BACK</span>        
+                </button>
+          
+                <!--  [disabled]="!form.valid" -->
+              <button mat-raised-button color="primary" matStepperNext>
+                <span translate>COMMON.BTN_NEXT</span> 
+              </button>
+            </ion-toolbar>
+
+          </form>
+        </mat-step>
+
+
+        <!-- Step 3: user details -->
+      <mat-step [stepControl]="forms[2]">
+
+          <form [formGroup]="forms[2]" (ngSubmit)="doSubmit($event)">
+
+            <ng-template matStepLabel>{{'REGISTER.STEP_USER_DETAILS'|translate}}</ng-template>
+
+            <!-- Last name -->
+            <mat-form-field >
+                <input matInput
+                      [placeholder]="'USER.LAST_NAME'|translate"
+                      formControlName="lastName"
+                      autocomplete="section-blue family-name"
+                      required>
+                <mat-error *ngIf="forms[2].controls.lastName.hasError('required') && forms[2].controls.lastName.dirty" translate>ERROR.FIELD_REQUIRED</mat-error>
+                <mat-error *ngIf="forms[2].controls.lastName.hasError('minlength') && forms[2].controls.lastName.dirty">
+                    <span>{{'ERROR.FIELD_TOO_SHORT_WITH_LENGTH' | translate: {minLength: 2} }}</span>
+                </mat-error>
+              </mat-form-field>
+    
+            <!-- First name -->
+            <mat-form-field >
+              <input matInput
+                    [placeholder]="'USER.FIRST_NAME'|translate"
+                    formControlName="firstName"
+                    autocomplete="section-blue given-name"
+                    required>
+              <mat-error *ngIf="forms[2].controls.firstName.hasError('required') && forms[2].controls.firstName.dirty" translate>ERROR.FIELD_REQUIRED</mat-error>
+              <mat-error *ngIf="forms[2].controls.firstName.hasError('minlength') && forms[2].controls.firstName.dirty">
+                  <span>{{'ERROR.FIELD_TOO_SHORT_WITH_LENGTH' | translate: {minLength: 2} }}</span>
+              </mat-error>
+            </mat-form-field>
+
+            <p ion-text color="danger" *ngIf="error && !sending">{{error|translate}}</p>
+    
+            <!-- buttons -->
+            <ion-toolbar class="hidden-xs hidden-sm">
+              <button mat-button icon-left matStepperPrevious *ngIf="!sending">
+                <ion-icon name="arrow-back"></ion-icon>
+                <span translate>COMMON.BTN_BACK</span>        
+              </button>
+          
+              
+              <button mat-raised-button color="primary" matStepperNext *ngIf="!sending">
+                <span translate>COMMON.BTN_SEND</span> 
+              </button>
+
+              <ion-spinner *ngIf="sending"></ion-spinner>
+            </ion-toolbar>
+          </form>
+       </mat-step>
+    </mat-horizontal-stepper>
+   
+
