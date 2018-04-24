@@ -1,0 +1,48 @@
+{
+  "APP_NAME": "SUMARiS",
+  "FILTER": {
+    "DATE_PATTERN": "YYYY-MM-DD"
+  },
+  "COMMON": {
+    "BTN_CANCEL": "Cancel",
+    "BTN_ADD": "Add",
+    "BTN_EDIT": "Edit",
+    "BTN_DELETE": "Delete",
+    "BTN_VALIDATE": "Validate",
+    "BTN_SAVE": "Sauvegarder",
+    "BTN_FILTER": "Filtrer"
+
+  },
+  "MENU": {
+    "HOME": "Home",
+    "TRIPS": "Trips"
+  },
+  "HOME": {
+    "WELCOME": "Welcome to the SUMARiS web site!",
+    "DESCRIPTION": "Completed skate stocks shared database.",
+    "BTN_TRIPS": "Search trips",
+    "BTN_REGISTER": "Register"
+  },
+  "PROFILE": {
+    "PROFILE_ADMIN": "Administrator",
+    "BTN_EDIT": "Edit Profile",
+    "BTN_LOG_OUT": "Log Out"
+  },
+  "AUTH": {
+    "TITLE": "Authentication"
+  },
+  "TRIPS": {
+    "TITLE": "Fishing trips"
+  },
+  "TRIP": {
+    "TITLE": "Fishing trip",
+    "DEPARTURE_DATE_TIME": "Departure date",
+    "DEPARTURE_LOCATION": "Departure harbour",
+    "RETURN_DATE_TIME": "Return date",
+    "RETURN_LOCATION": "Return harbour",
+    "COMMENTS": "Comments"
+  },
+  "ERROR": {
+    "FIELD_REQUIRED": "This field is required"
+  }
+}

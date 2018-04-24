@@ -1,0 +1,27 @@
+
+<mat-dialog-content [formGroup]="form">
+
+  <mat-form-field>
+    <input matInput
+           [placeholder]="'TRIP.DEPARTURE_DATE_TIME'|translate"
+           [matDatepicker]="departureDatepicker"
+           appAutofocus="true"
+           formControlName="departureDateTime">
+    <mat-datepicker-toggle matSuffix [for]="departureDatepicker"></mat-datepicker-toggle>
+    <mat-datepicker #departureDatepicker></mat-datepicker>
+    <mat-error *ngIf="form.controls['departureDateTime'].hasError('required')" translate>ERROR.FIELD_REQUIRED</mat-error>
+  </mat-form-field>
+
+  <!--<mat-form-field>
+    <input matInput
+           placeholder="Course Description"
+           formControlName="description">
+  </mat-form-field>-->
+
+
+</mat-dialog-content>
+
+<mat-dialog-actions>
+  <button class="mat-raised-button"(click)="close()">Close</button>
+  <button class="mat-raised-button mat-primary"(click)="save()">Save</button>
+</mat-dialog-actions>
