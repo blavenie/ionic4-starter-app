@@ -16,11 +16,15 @@
     "BTN_SEARCH": "Rechercher",
     "BTN_NEXT": "Suivant",
     "BTN_BACK": "Retour",
-    "BTN_SEND": "Envoyer"
+    "BTN_SEND": "Envoyer",
+    "CREATED_ON": "Créé le ",
+    "UPDATED_ON": "Mise à jour le",
+    "RECORDER": "Saisisseur"
   },
   "MENU": {
     "HOME": "Accueil",
     "TRIPS": "Marée",
+    "ADMINISTRATION_DIVIDER": "Administration",
     "USERS": "Utilisateurs",
     "FOOTER_VERSION_ABOUT": "v{{version}} | à propos",
     "BTN_ACCOUNT": "Compte",
@@ -44,12 +48,13 @@
     "TITLE": "Inscription",
     "STEP_EMAIL": "Email",
     "STEP_PASSWORD": "Mot de passe",
-    "STEP_USER_DETAILS": "Détail",
+    "STEP_USER_DETAILS": "Coordonnées",
     "CONFIRM_EMAIL": "Email (confirmation)",
     "CONFIRM_PASSWORD": "Mot de passe (confirmation)",
     "CONFIRMED": {
-      "TITLE": "Inscription confirmée !",
-      "DESCRIPTION": "Votre email a été validée avec succès. Votre inscription est maintenant <b>terminée</b> !",
+      "LOADING_TITLE": "Attente de la confirmation...",
+      "TITLE": "Inscription terminée !",
+      "SUCCESS_MESSAGE": "Votre adresse email <b>{{email}}</b> a bien été validée.<br/>Votre inscription est maintenant <b>terminée</b> !",
       "LOGIN_HELP": "Pour vous connecter, <b>cliquez ci-dessous</b> :"
     },
     "ERROR": {
@@ -58,8 +63,23 @@
       "EMAIL_ALREADY_REGISTERED": "Email déjà enregistrée"
     }
   },
+  "ACCOUNT": {
+    "TITLE": "Mon compte",
+    "EMAIL_NOT_CONFIRMED_LABEL": "L'email de ce compte n'a pas encore validé : <b>consultez votre boite mail</b> et cliquez sur le lien fourni.",
+    "EMAIL_NOT_RECEIVED_QUESTION": "Si vous n'avez pas reçu l'email de validation,<br/>vous pouvez <b>demander un nouvel envoi</b> :",
+    "BTN_RESEND": "Renvoyer",
+    "USER_DETAILS": {
+      "TITLE": "Profile",
+      "DESCRIPTION": "Voici les données enregistrées concernant votre compte :"
+    },
+    "SETTINGS": {
+      "TITLE": "Préférences",
+      "DESCRIPTION": "Voici les réglages possibles pour l'usage de l'application :",
+      "LOCALE": "Langue"
+    }
+  },
   "USER": {
-    "TITLE": "Uilisateur",
+    "TITLE": "Utilisateur",
     "EMAIL": "Email",
     "PASSWORD": "Mot de passe",
     "FIRST_NAME": "Prénom",
@@ -71,7 +91,7 @@
     }
   },
   "USERS": {
-    "TITLE": "Uilisateurs",
+    "TITLE": "Utilisateurs",
     "FILTER": {
       "TITLE": "Options de recherche :",
       "SEARCH": "Recherche"
@@ -87,11 +107,16 @@
   },
   "TRIP": {
     "TITLE": "Marée",
+    "VESSEL": "Navire",
+    "DEPARTURE": "Départ :",
     "DEPARTURE_DATE_TIME": "Date de départ",
     "DEPARTURE_LOCATION": "Port de départ",
+    "RETURN": "Retour :",
     "RETURN_DATE_TIME": "Date de retour",
     "RETURN_LOCATION": "Port de retour",
     "COMMENTS": "Commentaires",
+    "TAB_GENERAL": "Informations générales",
+    "TAB_OPERATIONS": "Opérations",
     "NEW": {
       "TITLE": "Nouvelle marée"
     },
@@ -114,6 +139,9 @@
     "BAD_PASSWORD": "Mot de passe incorrect.",
     "EMAIL_ALREADY_REGISTERED": "Email déjà enregistrée",
     "UNKNOWN_NETWORK_ERROR": "Erreur de communication avec le serveur.<br/>Si le problème persiste, veuillez contacter votre administrateur.",
-    "LOAD_ACCOUNT_ERROR": "Erreur de chargement du compte utilisateur.<br/>Si le problème persiste, veuillez contacter votre administrateur."
+    "LOAD_ACCOUNT_ERROR": "Erreur de chargement du compte utilisateur.<br/>Si le problème persiste, veuillez contacter votre administrateur.",
+    "SAVE_ACCOUNT_ERROR": "Erreur lors de la sauvegarde de votre compte.<br/>Si le problème persiste, veuillez contacter votre administrateur.",
+    "SENT_ACCOUNT_CONFIRMATION_EMAIL_FAILED": "Erreur d'envoi de l'email de confirmation du compte.<br/>Si le problème persiste, veuillez contacter votre administrateur.",
+    "CONFIRM_ACCOUNT_EMAIL_FAILED": "Erreur lors de la confirmation de l'email. Ce compte a peut-être déjà été confirmé ?"
   }
 }

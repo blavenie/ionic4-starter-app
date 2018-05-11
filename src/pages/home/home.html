@@ -1,5 +1,8 @@
+<app-toolbar color="primary" class="visible-xs"></app-toolbar>
+
 <ion-content padding 
              class="bg-image-cover center"
+
              [ngStyle]="{'background-image': 'url('+bgImage+')'}">
 
   <p class="hidden-xs">&nbsp;</p>
@@ -17,17 +20,17 @@
     <br/>
     <br/>
     <div>
-      <button ion-button icon-left full color="light" [routerLink]="['/trips']">
-        <ion-icon name="search"></ion-icon>
+      <button mat-raised-button icon-left  [color]="isLogin?'primary':'light'" [routerLink]="['/trips']">
+        <mat-icon>search</mat-icon>
         <span translate>HOME.BTN_TRIPS</span>
       </button>
 
-      <button ion-button icon-left full color="primary" [routerLink]="['/trips']" *ngIf="!isLogin">
+      <button mat-raised-button icon-left color="primary" [routerLink]="['/account']" *ngIf="!isLogin">
         <ion-icon name="log-in"></ion-icon>
         <span translate>AUTH.BTN_LOGIN</span>
       </button>
 
-      <button ion-button icon-left full color="light" [routerLink]="['/trips']" *ngIf="isLogin" disabled>
+      <button mat-raised-button icon-left color="secondary" [routerLink]="['/account']" *ngIf="isLogin">
         <ion-icon name="contact"></ion-icon>
         <span translate>HOME.BTN_MY_ACCOUNT</span>
       </button>
@@ -53,9 +56,11 @@
 
   <div class="bottom-banner">
       <img class="logo" src="./assets/img/logo/logo-interreg2seas.png">
-      <img class="logo" src="./assets/img/logo/logo-ilvo-text.png">
       <img class="logo" src="./assets/img/logo/logo-fromnord.png">
+      <img class="logo" src="./assets/img/logo/logo-ilvo-text.png">
       <img class="logo" src="./assets/img/logo/logo-ifremer.png">
+      <img class="logo" src="./assets/img/logo/logo-nausicaa.png">      
+      <img class="logo" src="./assets/img/logo/logo-redercentrale.png">
   </div>
 
 </ion-content>

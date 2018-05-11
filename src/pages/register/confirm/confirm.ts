@@ -1,38 +1,73 @@
-import {Component, OnInit, OnDestroy} from '@angular/core';
+import {Component, OnDestroy} from '@angular/core';
 import { Subscription } from 'rxjs';
-import { HomePage } from '../../home/home';
-
+import { ActivatedRoute } from '@angular/router';
+import { AccountService } from '../../../services/account-service';
+import {Location} from '@angular/common';
 
 @Component({
   selector: 'page-registrer-confirm',
   templateUrl: 'confirm.html'
 })
-export class RegisterConfirmPage extends HomePage implements OnInit, OnDestroy {
+export class RegisterConfirmPage implements OnDestroy {
 
-  loading: boolean = true;
+  isLogin: boolean;
   subscriptions: Subscription[] = [];
+  loading: boolean = true;
+  error: String;
+  email: String;
 
-  ngOnInit() {
-    this.subscriptions.push(this.activatedRoute.paramMap.subscribe(params => {
-      let email = params.get("email");
-      console.log("Cheking account", email);
-      if (this.accountService.isLogin()) {
-        let emailAccount = this.accountService.account && this.accountService.account.email
-        if (email != emailAccount) {      
-
-          // Not same email : force logout
-          return this.accountService.logout()
-            .then(() => {
-              this.loading = false;
-            });
-        }
-      }
-      this.loading = false;
-    }));
+  constructor(
+    private accountService: AccountService,
+    private activatedRoute: ActivatedRoute,
+    private location: Location) {
+      this.isLogin = accountService.isLogin();
+  
+      // Subscriptions
+      this.subscriptions.push(this.accountService.onLogin.subscribe(account => this.isLogin = true));
+      this.subscriptions.push(this.accountService.onLogout.subscribe(() => this.isLogin = false));
+      this.subscriptions.push(this.activatedRoute.paramMap.subscribe(params => 
+        this.doConfirm(params.get("email"), params.get("code"))
+      ));
   }
 
   ngOnDestroy() {
     this.subscriptions.forEach(s => s.unsubscribe());
     this.subscriptions = [];
+  }
+
+  doConfirm(email: String, code: String) {
+    this.email = email;
+
+    if (!code) {
+      this.loading = false;
+      this.error = null;
+      return;
+    }
+    
+    if (this.accountService.isLogin()) {
+      let emailAccount = this.accountService.account && this.accountService.account.email
+      if (email != emailAccount) {      
+        // Not same email => logout, then retry
+        return this.accountService.logout()
+          .then(() => this.doConfirm(email, code));
+      }
+    }
+
+    // Send the confirmation code
+    this.accountService.confirmEmail(email, code)
+      .then(confirmed => {
+        if (confirmed && this.isLogin) {
+          return this.accountService.refresh();
+        }
+      })
+      .then(() => {
+        this.loading = false;
+        //this.location.replaceState("/confirm/" + email + "/");
+      })
+      .catch(err => {
+        this.error = err && err.message || err;
+        this.loading = false;
+      });
+
   }
 }

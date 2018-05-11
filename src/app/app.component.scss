@@ -44,6 +44,10 @@ ion-content .scroll-content {
   margin-top: 56px;
 }
 
+p {
+  color: #333;
+}
+
 [hidden] {
   display: none !important;
 }
@@ -60,6 +64,9 @@ $screen-md:                       992px;
 $screen-md-max:                   1199px;
 $screen-lg:                       1200px;
 
+//$grid-breakpoints: (
+//  xs: 0
+//)
 
 // IE10 on Windows Phone 8
 // IE10 on WP8 doesn't report CSS pixels, but actual device pixels. In
@@ -346,12 +353,11 @@ ion-menu .no-profile-header .scroll-content{
   margin-top: 79px !important;
 }
 ion-menu .has-profile-header .scroll-content{
-  margin-top:192px !important;
+  margin-top:188px !important;
 }
 
 ion-menu .user-avatar {
   color: #d9d9d9;
-  background-color: color($colors, primary);
   -webkit-background-size: cover;
   -moz-background-size: cover;
   -o-background-size: cover;
@@ -367,16 +373,23 @@ ion-menu .user-avatar {
   border-radius: 50%;
   display: inline-block;
 }
+ion-menu .user-avatar.primary {
+  background-color: color($colors, primary);
+}
 
 ion-menu .align-right {
   text-align: right;
 }
 
 ion-menu {
-  h2.username {
+  .username {
     padding-top: 0;
     margin-top: 0;
     margin-bottom: 0;
+    width: 100%;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
   }
 }
 
@@ -396,11 +409,25 @@ mat-cell .avatar {
 // --------------------------------------------------
 // Forms
 // --------------------------------------------------
+form {
+  color: rgba(0, 0, 0, 0.87);
 
+  .mat-form-field-disabled,
+  .mat-input-element:disabled {
+    color: rgba(0, 0, 0, 0.55) !important;
+  }
+}
 mat-form-field {
   mat-error {
     text-align: right;    
   }
+}
+
+form mat-form-field {
+  font-size: 16px !important;
+}
+mat-form-field .mat-paginator-page-size-select {
+  font-size: 14px !important;
 }
 
 // --- mat-stepper component
@@ -431,5 +458,43 @@ mat-horizontal-stepper {
     .mat-horizontal-content-container {
       padding: 0;
     }
+  }
+}
+
+@media screen and (min-width: $screen-md) and (max-width: $screen-md-max) {
+  ion-modal .modal-wrapper {
+      left: calc(50% - (768px/2));
+      top: calc(50% - (600px/2));
+      position: absolute;
+      width: 768px;
+      height: 600px;
+  }
+}
+
+@media screen and (min-width: $screen-lg) {
+  ion-modal .modal-wrapper {
+      left: calc(50% - (1000px/2));
+      top: calc(50% - (600px/2));
+      position: absolute;
+      width: 1000px;
+      height: 600px;
+  }
+}
+
+mat-option:has(ion-row) {
+  padding: 0;
+}
+
+mat-option ion-row {
+  padding: 0;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.12);
+
+  ion-col.col {
+    padding: 0;
+    padding-left: 16px;
+  }
+
+  ion-col.col:first-child {
+    padding: 0;
   }
 }

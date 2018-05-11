@@ -41,11 +41,11 @@ export class AuthForm implements OnInit {
 
 
   ngOnInit() {
-    // For DEV only
-    /*this.form.setValue({
+    /* For DEV only*/
+    this.form.setValue({
       username: 'benoit.lavenier@e-is.pro',
       password: 'priezPourMoi!'
-    });*/
+    });
   }
 
   cancel() {

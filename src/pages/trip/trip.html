@@ -1,12 +1,62 @@
-<!--
-  Generated template for the TripPage page.
 
-  See http://ionicframework.com/docs/components/#navigation for more info on
-  Ionic pages and navigation.
--->
-<app-toolbar [title]="'TRIP.TITLE'|translate"></app-toolbar>
+<app-toolbar [title]="'TRIP.TITLE'|translate" color="primary" (onValidate)="save($event, form.value)"></app-toolbar>
+
+<ion-content>
+
+    <mat-tab-group>      
+
+        <!-- TAB: general --> 
+        <mat-tab label="{{'TRIP.TAB_GENERAL'|translate}}">
+            <ng-template mat-tab-label>
+                <ion-icon name="information-circle"></ion-icon>
+                <span>{{'TRIP.TAB_GENERAL'|translate}}</span>
+            </ng-template>
+
+            <ion-row no-padding responsive *ngIf="data">
+                <ion-col>
+                    <mat-card no-padding>                
+                        <mat-card-header padding>
+                            <div mat-card-avatar [ngStyle]="{'background-image':'url('+(data.recorderPerson?.avatar||'./assets/img/person.png')+')'}"></div>
+                            <mat-card-title translate>COMMON.RECORDER</mat-card-title>
+                            <mat-card-subtitle>
+                                {{data.recorderPerson?.firstName}} {{data.recorderPerson?.lastName}}
+                                <span *ngIf="data.recorderPerson">|</span>
+                                {{data.recorderDepartment?.name}}
+                            </mat-card-subtitle>
+                        </mat-card-header>
+                    </mat-card>
+                </ion-col>
+                <ion-col>
+                    <mat-card style="height: 100%;" no-padding>
+                        <mat-card-header padding>
+                            <mat-card-title>
+                                <ion-icon name="calendar"></ion-icon>
+                                <span translate>COMMON.CREATED_ON</span>
+                                {{ data.creationDate | date: 'medium'}}
+                            </mat-card-title>
+                            <mat-card-subtitle *ngIf="data.updateDate && data.updateDate != data.creationDate">
+                                <ion-icon name="time"></ion-icon>
+                                <span translate>COMMON.UPDATED_ON</span>
+                                {{ data?.updateDate | date: 'medium'}}
+                            </mat-card-subtitle>
+                        </mat-card-header>
+                    </mat-card>    
+                </ion-col>
+            </ion-row>                                
+            
+            <form-trip (onSubmit)="save($event, form.value)" padding #form>
+            </form-trip>
+           
+        </mat-tab>
 
 
-<ion-content padding>
+         <!-- TAB: operations --> 
+        <mat-tab label="{{'TRIP.TAB_OPERATIONS'|translate}}">
+            <ng-template mat-tab-label>
+                <ion-icon name="locate"></ion-icon>
+                <span>{{'TRIP.TAB_OPERATIONS'|translate}}</span>
+            </ng-template>
+        </mat-tab>
+    </mat-tab-group>
 
 </ion-content>

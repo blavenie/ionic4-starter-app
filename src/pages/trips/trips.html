@@ -94,29 +94,29 @@
       <mat-cell  class="hidden-xs hidden-sm" *matCellDef="let row">{{ row.currentData.id }}</mat-cell>
     </ng-container>
 
-    <!-- departure date time  -->
-    <ng-container matColumnDef="departureDateTime">
-      <mat-header-cell *matHeaderCellDef mat-sort-header>
-        <span translate>TRIP.DEPARTURE_DATE_TIME</span>
-      </mat-header-cell>
-      <mat-cell class="mat-cell-date-time" *matCellDef="let row" >
-        <mat-form-field floatPlaceholder="never">
-          <input matInput
-                 [matDatepicker]="departureDatepicker"
-                 [formControl]="row.validator.controls['departureDateTime']"
-                 [readonly]="!row.editing"
-                 [appAutofocus]="row.editing"
-                 [ngModel]="row.currentData.departureDateTime">
-          <mat-datepicker-toggle matSuffix [for]="departureDatepicker">
-            <mat-icon matDatepickerToggleIcon>keyboard_arrow_down</mat-icon>
-          </mat-datepicker-toggle>
-          <mat-datepicker #departureDatepicker></mat-datepicker>
-          <mat-error *ngIf="row.validator.controls['departureDateTime'].hasError('required')" translate>ERROR.FIELD_REQUIRED</mat-error>
-        </mat-form-field>
-
-      </mat-cell>
-
-    </ng-container>
+     <!-- Vessel Column -->
+     <ng-container matColumnDef="vessel">
+        <mat-header-cell class="hidden-xs hidden-sm" *matHeaderCellDef mat-sort-header>
+            <span translate>TRIP.VESSEL</span>
+        </mat-header-cell>
+        <mat-cell  class="hidden-xs hidden-sm" *matCellDef="let row">
+            <mat-form-field floatPlaceholder="never">
+              <input matInput
+                      [formControl]="row.validator.controls['vesselFeatures']"
+                      [placeholder]="'TRIP.VESSEL'|translate"
+                      [matAutocomplete]="autoVessel"
+                      [appAutofocus]="row.editing"
+                      [readonly]="!row.editing"
+                      [ngModel]="row.currentData.vesselFeatures">
+              <mat-error *ngIf="row.validator.controls['vesselFeatures'].hasError('required')" translate>ERROR.FIELD_REQUIRED</mat-error>
+           </mat-form-field>
+           <mat-autocomplete #autoVessel="matAutocomplete" [displayWith]="displayVesselFn">
+              <mat-option *ngFor="let vessel of vessels" [value]="vessel">
+                  {{vessel.exteriorMarking}} - {{vessel.name}}
+              </mat-option>
+            </mat-autocomplete>
+        </mat-cell>
+      </ng-container>
 
     <!-- departure location -->
     <ng-container matColumnDef="departureLocation">
@@ -142,6 +142,30 @@
       </mat-cell>
     </ng-container>
 
+
+    <!-- departure date time  -->
+    <ng-container matColumnDef="departureDateTime">
+        <mat-header-cell *matHeaderCellDef mat-sort-header>
+          <span translate>TRIP.DEPARTURE_DATE_TIME</span>
+        </mat-header-cell>
+        <mat-cell class="mat-cell-date-time" *matCellDef="let row" >
+          <mat-form-field floatPlaceholder="never">
+            <input matInput
+                   [matDatepicker]="departureDatepicker"
+                   [formControl]="row.validator.controls['departureDateTime']"
+                   [readonly]="!row.editing"
+                   [ngModel]="row.currentData.departureDateTime">
+            <mat-datepicker-toggle matSuffix [for]="departureDatepicker">
+              <mat-icon matDatepickerToggleIcon>keyboard_arrow_down</mat-icon>
+            </mat-datepicker-toggle>
+            <mat-datepicker #departureDatepicker></mat-datepicker>
+            <mat-error *ngIf="row.validator.controls['departureDateTime'].hasError('required')" translate>ERROR.FIELD_REQUIRED</mat-error>
+          </mat-form-field>
+  
+        </mat-cell>
+  
+      </ng-container>
+      
     <!-- return date time -->
     <ng-container matColumnDef="returnDateTime">
       <mat-header-cell *matHeaderCellDef mat-sort-header>
@@ -182,38 +206,39 @@
 
     <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
     <mat-row *matRowDef="let row; columns: displayedColumns;"
-             (click)="onRowClicked(row)"
-             (onblur)="confirmAndAddRow(row)"></mat-row>
+             (click)="onOpenRowDetail($event, row)"
+             (onblur)="confirmAndAddRow(row)"
+             ></mat-row>
+             <!-- (dblclick)="onEditRow(row)"-->
   </mat-table>
 
 
 
   <!-- Bottom buttons -->
 
-  <div class="mat-ro row" >
+  
+  <ion-row no-padding>
 
-    <div class="col" *ngIf="!loading">
-      <!--<button mat-button icon-left small color="primary" (click)="addRow()" >
-        <ion-icon name="md-add"></ion-icon>
-        <span translate>COMMON.BTN_ADD</span>
-      </button>-->
-      <button mat-raised-button *ngIf="dirty" (click)="onRefresh.emit()" >
-        <ion-icon name="md-close"></ion-icon>
-        <span translate>COMMON.BTN_CANCEL</span>
-      </button>
-      <button mat-raised-button color="primary" *ngIf="dirty" (click)="save()" >
-        <ion-icon name="md-checkmark"></ion-icon>
-        <span translate>COMMON.BTN_SAVE</span>
-      </button>
-    </div>
+    <ion-col col-6 padding >
+      <ion-buttons left start *ngIf="!loading">
+          <button mat-raised-button *ngIf="dirty" (click)="onRefresh.emit()" >
+            <ion-icon name="md-close"></ion-icon>
+            <span translate>COMMON.BTN_CANCEL</span>
+          </button>
+          <button mat-raised-button color="primary" *ngIf="dirty" (click)="save()" >
+            <ion-icon name="md-checkmark"></ion-icon>
+            <span translate>COMMON.BTN_SAVE</span>
+          </button>
+      </ion-buttons>
+    </ion-col>
 
-    <div class="col">
+    <ion-col no-padding col-6>
       <mat-paginator [length]="resultsLength"
                      [pageSize]="10"
                      [pageSizeOptions]="[10, 50, 100, 200]">
       </mat-paginator>
-    </div>
-  </div>
+    </ion-col>
+  </ion-row>
 
   <!--<ion-list *ngIf="loading">
     <ion-item *ngFor="let row of dataSource.currentData">

@@ -1,12 +1,12 @@
 import {Injectable} from "@angular/core";
 import gql from "graphql-tag";
 import {Apollo} from "apollo-angular";
-import {ApolloQueryResult} from "apollo-client";
 import {Observable, Subject} from "rxjs";
 import {Trip} from "./model";
-import {DataService} from "./data-service";
+import {DataService, BaseDataService} from "./data-service";
 import {map} from "rxjs/operators";
 import { Moment } from "moment";
+import { DocumentNode } from "graphql";
 
 export declare class TripFilter {
   startDate: Date|Moment;
@@ -18,10 +18,7 @@ export declare class TripsVariables extends TripFilter {
   sortBy?: string;
   sortDirection?: string;
 };
-export declare type TripsResult = {
-  trips: Trip[];
-}
-const Trips = gql`
+const LoadAllQuery: DocumentNode = gql`
   query Trips($startDate: Date, $offset: Int, $size: Int, $sortBy: String, $sortDirection: String){
     trips(filter: {startDate: $startDate}, offset: $offset, size: $size, sortBy: $sortBy, sortDirection: $sortDirection){
       id
@@ -29,7 +26,6 @@ const Trips = gql`
       returnDateTime
       creationDate
       updateDate
-      vesselId
       comments
       departureLocation {
         id
@@ -46,10 +42,47 @@ const Trips = gql`
         label
         name
       }
+      vesselFeatures {
+        vesselId,
+        name,
+        exteriorMarking
+      }
     }
   }
 `;
-const SaveTrips = gql`
+const LoadQuery: DocumentNode = gql`
+  query Trip($id: Int) {
+    trip(id: $id) {
+      id
+      departureDateTime
+      returnDateTime
+      creationDate
+      updateDate
+      comments
+      departureLocation {
+        id
+        label
+        name
+      }
+      returnLocation {
+        id
+        label
+        name
+      }
+      recorderDepartment {
+        id
+        label
+        name
+      }
+      vesselFeatures {
+        vesselId
+        name
+        exteriorMarking
+      }
+    }
+  }
+`;
+const SaveTrips: DocumentNode = gql`
   mutation saveTrips($trips:[TripVOInput]){
     saveTrips(trips: $trips){
       id
@@ -59,13 +92,22 @@ const SaveTrips = gql`
 `;
 
 @Injectable()
-export class TripService implements DataService<Trip, TripFilter>{
+export class TripService extends BaseDataService implements DataService<Trip, TripFilter>{
 
   constructor(
-    private apollo: Apollo
+    protected apollo: Apollo
   ) {
+    super(apollo);
   }
 
+  /**
+   * Load many trips
+   * @param offset 
+   * @param size 
+   * @param sortBy 
+   * @param sortDirection 
+   * @param filter 
+   */
   loadAll(offset: number,
           size: number,
           sortBy?: string,
@@ -80,20 +122,43 @@ export class TripService implements DataService<Trip, TripFilter>{
       sortDirection: sortDirection || 'asc'
     };
     console.debug("[trip-service] Getting trips using options:", variables);
-    this.apollo.getClient().cache.reset();
-    return this.apollo.query<ApolloQueryResult<TripsResult>, TripsVariables>({
-      query: Trips,
+    return this.apollo.query<{trips: Trip[]}, TripsVariables>({
+      query: LoadAllQuery,
       variables: variables
     })
     .pipe(
-      map(
-        ({data}) => (data && data['trips'] || []).map(t => {
+      map(({data}) => (data && data.trips || []).map(t => {
           const res = new Trip();
+          console.log(t);
           res.fromObject(t);
           return res;
         })));
   }
 
+  load(id: number): Promise<Trip|null> {
+    console.debug("[trip-service] Loading trip {" + id+ "}...");
+
+    return this.query<{trip: Trip}>({
+      query: LoadQuery,
+      variables: {
+        id: id
+      }
+    })
+    .then(data => {
+      if (data && data.trip) {
+        const res = new Trip();
+        res.fromObject(data.trip);
+        console.debug("[trip-service] Loaded trip {" + id+ "}", res);
+        return res;
+      }
+      return null;
+    });
+  }
+
+  /**
+   * Save many trips
+   * @param data 
+   */
   saveAll(data: Trip[]): Observable<Trip[]> {
 
     console.debug("[trip-service] Saving trips: ", data);

@@ -1,7 +1,7 @@
 <ion-header>
     <ion-toolbar>
       <ion-title translate="">
-        {{(!!data.id ? 'TRIP.EDIT.TITLE' : 'TRIP.NEW.TITLE') |translate}}
+        {{(!!data?.id ? 'TRIP.EDIT.TITLE' : 'TRIP.NEW.TITLE') |translate}}
       </ion-title>
       <ion-buttons start>
         <button ion-button (click)="cancel()">
@@ -12,8 +12,8 @@
   </ion-header>
   
   <ion-content padding>
-      <form-trip (onSave)="onSave($event)" [data]="data">
-        </form-trip>
+      <form-trip (onSubmit)="onSave($event)" #form>
+      </form-trip>
   </ion-content>
 <mat-dialog-content>
 

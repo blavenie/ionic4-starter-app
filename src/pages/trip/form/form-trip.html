@@ -1,51 +1,127 @@
 <form class="form-container"
       [formGroup]="form"
-      (ngSubmit)="onSubmit($event, form.value)">
+      (ngSubmit)="doSubmit($event, form.value)">
 
-  <ion-item>
-    <mat-form-field>
-      <input matInput
-            [placeholder]="'TRIP.DEPARTURE_DATE_TIME'|translate"
-            [matDatepicker]="departureDatepicker"
-            formControlName="departureDateTime"
-            [ngModel]="data.departureDateTime">
-      <mat-datepicker-toggle matSuffix [for]="departureDatepicker">
-          <mat-icon matDatepickerToggleIcon>keyboard_arrow_down</mat-icon>
-      </mat-datepicker-toggle>
-      <mat-datepicker #departureDatepicker></mat-datepicker>
-      <mat-error *ngIf="form.controls.departureDateTime.hasError('required') && form.controls.departureDateTime.touched" translate>ERROR.FIELD_REQUIRED</mat-error>
-    </mat-form-field>
+  <ion-grid>
+
+    <!-- VESSEL -->
+    <ion-row>
+        <ion-col col-12 class="hidden-xs">
+            <mat-form-field >
+                <ion-icon margin-right name="boat" matPrefix></ion-icon>
+                <input matInput
+                        [placeholder]="'TRIP.VESSEL'|translate"
+                        [matAutocomplete]="autoVessel"
+                        formControlName="vesselFeatures">
+                  <mat-error *ngIf="form.controls.vesselFeatures?.hasError('required')" translate>ERROR.FIELD_REQUIRED</mat-error>
+             </mat-form-field>
+             <mat-autocomplete #autoVessel="matAutocomplete" [displayWith]="displayVesselFn">
+                <mat-option *ngFor="let vessel of vessels" [value]="vessel">
+                  <ion-row>
+                      <ion-col col-2>{{vessel.exteriorMarking}}</ion-col>
+                      <ion-col>{{vessel.name}}</ion-col>
+                  </ion-row>
+                </mat-option>
+              </mat-autocomplete>
+        </ion-col>
+    </ion-row>
+
+    <!-- DEPARTURE -->
+    <ion-row>
+      <ion-col col-1>
+        <p><span ion-text translate>TRIP.DEPARTURE</span></p>
+      </ion-col>
+      <ion-col>
+          <mat-form-field>
+              <ion-icon margin-right name="pin" matPrefix></ion-icon>
+              <input matInput
+                      [placeholder]="'TRIP.DEPARTURE_LOCATION'|translate"
+                      [matAutocomplete]="autoDepartureLocation"
+                      formControlName="departureLocation">
+                <mat-error *ngIf="form.controls.departureLocation.hasError('required')" translate>ERROR.FIELD_REQUIRED</mat-error>
+           </mat-form-field>
+           <mat-autocomplete #autoDepartureLocation="matAutocomplete" [displayWith]="displayReferentialFn">
+              <mat-option *ngFor="let location of locations" [value]="location">
+                  {{ location.label }} - {{ location.name }}
+              </mat-option>
+            </mat-autocomplete>
+      </ion-col>
+      <ion-col>
+          <mat-form-field>
+              <ion-icon margin-right name="time" matPrefix></ion-icon>
+              <input matInput
+                    [placeholder]="'TRIP.DEPARTURE_DATE_TIME'|translate"
+                    [matDatepicker]="departureDatepicker"
+                    formControlName="departureDateTime">
+              <mat-datepicker-toggle matSuffix [for]="departureDatepicker">
+                  <mat-icon matDatepickerToggleIcon>keyboard_arrow_down</mat-icon>
+              </mat-datepicker-toggle>
+              <mat-datepicker #departureDatepicker></mat-datepicker>
+              <mat-error *ngIf="form.controls.departureDateTime.hasError('required') && form.controls.departureDateTime.touched" translate>ERROR.FIELD_REQUIRED</mat-error>
+            </mat-form-field>
+      </ion-col>     
+    </ion-row>
+
+    <!-- RETURN -->
+    <ion-row>
+      <ion-col col-1 class="hidden-xs">
+        <p><span ion-text translate>TRIP.RETURN</span></p>
+      </ion-col>
+      <ion-col>
+          <mat-form-field>
+              <ion-icon margin-right name="pin" matPrefix></ion-icon>
+              <input matInput
+                      [placeholder]="'TRIP.RETURN_LOCATION'|translate"
+                      [matAutocomplete]="autoReturnLocation"
+                      formControlName="returnLocation">
+                <mat-error *ngIf="form.controls.returnLocation.hasError('required')" translate>ERROR.FIELD_REQUIRED</mat-error>
+           </mat-form-field>
+           <mat-autocomplete #autoReturnLocation="matAutocomplete" [displayWith]="displayReferentialFn">
+              <mat-option *ngFor="let location of locations" [value]="location">
+                  {{ location.label }} - {{ location.name }}
+              </mat-option>
+            </mat-autocomplete>
+      </ion-col>
+
+      <ion-col>
+          <mat-form-field>
+            <ion-icon margin-right name="time" matPrefix></ion-icon>
+            <input matInput
+                    [placeholder]="'TRIP.RETURN_DATE_TIME'|translate"
+                    [matDatepicker]="returnDatepicker"
+                    formControlName="returnDateTime">
+            <mat-datepicker-toggle matSuffix [for]="returnDatepicker">
+                <mat-icon matDatepickerToggleIcon>keyboard_arrow_down</mat-icon>
+            </mat-datepicker-toggle>
+            <mat-datepicker #returnDatepicker></mat-datepicker>
+          </mat-form-field>
+      </ion-col>
+    </ion-row>
+
+    <!-- Comments -->
+    <ion-row>
+        <ion-col col-12>
+            <mat-form-field>                
+                <textarea matInput
+                        rows="4"
+                        [placeholder]="'TRIP.COMMENTS'|translate"
+                        formControlName="comments">
+                </textarea>
+                <mat-error *ngIf="form.controls.comments?.hasError('required')" translate>ERROR.FIELD_REQUIRED</mat-error>
+             </mat-form-field>
+        </ion-col>
+    </ion-row>
+  </ion-grid>
+
+
+  <ion-row class="hidden-xs hidden-sm padding bar" style="text-align: right;" *ngIf="!loading && form.dirty">
+
+      <button mat-button (click)="onCancel.emit()" type="button">
+        {{'COMMON.BTN_CANCEL'|translate}}
+      </button>
   
-    <mat-form-field>
-      <input matInput
-              [placeholder]="'TRIP.DEPARTURE_LOCATION'|translate"
-              [matAutocomplete]="autoDepartureLocation"
-              formControlName="departureLocation">
-        <mat-error *ngIf="form.controls['departureLocation'].hasError('required')" translate>ERROR.FIELD_REQUIRED</mat-error>
-   </mat-form-field>
-
-    <mat-autocomplete #autoDepartureLocation="matAutocomplete" [displayWith]="displayReferentialFn">
-      <mat-option *ngFor="let location of locations" [value]="location">
-          {{ location.label }} - {{ location.name }}
-      </mat-option>
-    </mat-autocomplete>
-  </ion-item>
-
-  <ion-item>
-    <mat-form-field>
-      <input matInput
-              [placeholder]="'TRIP.RETURN_DATE_TIME'|translate"
-              [matDatepicker]="returnDatepicker"
-              formControlName="returnDateTime"
-              [ngModel]="data.returnDateTime">
-      <mat-datepicker-toggle matSuffix [for]="returnDatepicker">
-          <mat-icon matDatepickerToggleIcon>keyboard_arrow_down</mat-icon>
-      </mat-datepicker-toggle>
-      <mat-datepicker #returnDatepicker></mat-datepicker>
-    </mat-form-field>
-  </ion-item>
-
-  <button ion-button icon-left full color="primary" [disabled]="!form.valid" style="margin-top: 20px;" type="submit" >
-      {{'COMMON.BTN_SAVE'|translate}}
-  </button>
+      <button mat-raised-button color="primary" type="submit">
+        {{'COMMON.BTN_SAVE'|translate}}
+      </button>
+    </ion-row>
 </form>

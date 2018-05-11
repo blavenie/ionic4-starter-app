@@ -6,32 +6,41 @@
 
   <div class="main-content">
 
-    <h4>
-      <ion-icon name="checkmark"></ion-icon>
-      <span translate>REGISTER.CONFIRMED.TITLE</span>
-    </h4>
+    <div >
+      <h4 *ngIf="loading">
+        <span translate>REGISTER.CONFIRMED.LOADING_TITLE</span>
+      </h4>
 
-    <p ion-text [innerHTML]="'REGISTER.CONFIRMED.DESCRIPTION'|translate"></p>    
+      <p *ngIf="loading">
+        <ion-spinner></ion-spinner>
+      </p>      
+      <p ion-text color="danger" *ngIf="error && !loading" [innerHTML]="error|translate"></p>
+    </div>
 
-    <p ion-text
-      *ngIf="!isLogin"
-     [innerHTML]="'REGISTER.CONFIRMED.LOGIN_HELP'|translate"></p>    
+    <div *ngIf="!loading && !error">
+      <h4>
+        <ion-icon name="checkmark"></ion-icon>
+        <span translate>REGISTER.CONFIRMED.TITLE</span>
+      </h4>
 
-    <br/>
-    <div>
-      <ion-spinner *ngIf="loading"></ion-spinner>
+      <p ion-text [innerHTML]="'REGISTER.CONFIRMED.SUCCESS_MESSAGE'|translate: {email: email}"></p>    
 
-      
-      <button ion-button icon-left full color="primary" [routerLink]="['/trips']" *ngIf="!isLogin && !loading">
-        <ion-icon name="log-in"></ion-icon>
-        <span translate>AUTH.BTN_LOGIN</span>
-      </button>
+      <p ion-text *ngIf="!isLogin" [innerHTML]="'REGISTER.CONFIRMED.LOGIN_HELP'|translate"></p>    
 
-      <button ion-button icon-left full color="light" [routerLink]="['/trips']" *ngIf="isLogin && !loading" disabled>
-        <ion-icon name="contact"></ion-icon>
-        <span translate>HOME.BTN_MY_ACCOUNT</span>
-      </button>
-      
+      <br/>
+      <div>
+        
+        <button ion-button icon-left full color="primary" [routerLink]="['/trips']" *ngIf="!isLogin && !loading">
+          <ion-icon name="log-in"></ion-icon>
+          <span translate>AUTH.BTN_LOGIN</span>
+        </button>
+
+        <button ion-button icon-left full color="light" [routerLink]="['/account']" *ngIf="isLogin && !loading">
+          <ion-icon name="contact"></ion-icon>
+          <span translate>HOME.BTN_MY_ACCOUNT</span>
+        </button>
+        
+      </div>
     </div>
   </div>
 

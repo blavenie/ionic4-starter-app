@@ -1,21 +1,21 @@
 import { Component, ViewChild } from '@angular/core';
-import {Platform, Nav, MenuController} from "ionic-angular";
+import { Platform, MenuController } from "ionic-angular";
 
 import { StatusBar } from '@ionic-native/status-bar';
 import { SplashScreen } from '@ionic-native/splash-screen';
 import { Keyboard } from '@ionic-native/keyboard';
 
 
-import {Router} from "@angular/router";
-import {Account} from "../services/model";
-import {AccountService} from "../services/account-service";
+import { Router } from "@angular/router";
+import { Account } from "../services/model";
+import { AccountService } from "../services/account-service";
 
 const conf = require('../lib/conf.js')
 
 export interface MenuItem {
   title: string;
-  path: string;
-  icon: string;
+  path?: string;
+  icon?: string;
 }
 
 @Component({
@@ -28,12 +28,11 @@ export class MyApp {
   private appMenuItems: Array<MenuItem> =  [
     {title: 'MENU.HOME', path: '/', icon: 'home'},
     {title: 'MENU.TRIPS', path: '/trips', icon: 'pin'},
+    {title: 'MENU.ADMINISTRATION_DIVIDER'},
     {title: 'MENU.USERS', path: '/users', icon: 'people'}
   ];
 
   appVersion: String = conf.version;
-
-  @ViewChild(Nav) nav: Nav;
 
   constructor(platform: Platform, statusBar: StatusBar, splashScreen: SplashScreen, keyboard: Keyboard,
               private accountService: AccountService,
@@ -65,7 +64,7 @@ export class MyApp {
   }
 
   onLogin(account: Account) {
-    console.log('[app] Logged account: ', account);
+    //console.log('[app] Logged account: ', account);
     this.account = account;
     this.isLogin = true;
   }

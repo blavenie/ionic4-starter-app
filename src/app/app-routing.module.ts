@@ -6,6 +6,7 @@ import {TripPage} from "../pages/trip/trip";
 import {TripsPage} from "../pages/trips/trips";
 import { UsersPage } from '../pages/users/users';
 import { RegisterConfirmPage } from '../pages/register/confirm/confirm';
+import { AccountPage } from '../pages/account/account';
 
 
 const routes: Routes = [
@@ -24,6 +25,13 @@ const routes: Routes = [
     component: RegisterConfirmPage
   },
 
+  // Account
+  {
+    path: 'account',
+    component: AccountPage,
+    canActivate:[AuthGuard]
+  },
+
   // Users
   {
     path: 'users',
@@ -31,16 +39,14 @@ const routes: Routes = [
     canActivate:[AuthGuard]
   },
 
-  // Data
+  // Data: Trips, ...
   {
     path: 'trips',
-    component: TripsPage,
-    canActivate:[AuthGuard]
-  },
-  {
-    path: 'trip/:id',
-    component: TripPage,
-    canActivate:[AuthGuard]
+    canActivate:[AuthGuard],
+    children: [
+      { path: '', component: TripsPage },
+      { path: ':id', component: TripPage }
+    ]
   },
   {
     path: "**",

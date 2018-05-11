@@ -8,9 +8,10 @@ import {TripValidatorService} from "./validator/validators";
 import {TripService, TripFilter} from "../../services/trip-service";
 import {SelectionModel} from "@angular/cdk/collections";
 import {TripModal} from "../trip/modal/modal-trip";
-import {Trip, Referential} from "../../services/model";
+import {Trip, Referential, VesselFeatures} from "../../services/model";
 import {Subscription} from "rxjs";
 import { ModalController } from "ionic-angular";
+import { Router, ActivatedRoute } from "@angular/router";
 
 @Component({
   selector: 'page-trips',
@@ -23,8 +24,8 @@ export class TripsPage implements OnInit, OnDestroy {
 
   any: any;
   subscriptions: Subscription[] = [];
-  displayedColumns = ['select', 'id',
-    'departureDateTime', 'departureLocation',
+  displayedColumns = ['select', 'id', 'vessel',
+    'departureLocation', 'departureDateTime',
     'returnDateTime',  //'returnLocation',
     'comments'];
   dataSource:AppTableDataSource<Trip, TripFilter>;
@@ -36,6 +37,10 @@ export class TripsPage implements OnInit, OnDestroy {
   locations: Referential[] = [
     new Referential({id: 1, label: 'XBR', name: 'Brest'}),
     new Referential({id: 2, label: 'XBL', name: 'Boulogne'})
+  ];
+  vessels: VesselFeatures[] = [
+    new VesselFeatures().fromObject({vesselId: 1, exteriorMarking: 'FRA000851751', name: 'Vessel1'}),
+    new VesselFeatures().fromObject({vesselId: 2, exteriorMarking: 'BEL000152147', name: 'Belgium Oscar'})
   ];
   selection = new SelectionModel<TableElement<Trip>>(true, []);
   selectedRow: TableElement<Trip> = undefined;
@@ -51,10 +56,12 @@ export class TripsPage implements OnInit, OnDestroy {
   @Output()
   listChange = new EventEmitter<Trip[]>();
 
-  constructor(//private dialog: MatDialog,
+  constructor(
               private tripValidatorService: TripValidatorService,
               private tripService: TripService,
-              private modalCtrl: ModalController
+              private modalCtrl: ModalController,
+              private route: ActivatedRoute,
+              private router: Router
   ) {
     this.dataSource = new AppTableDataSource<Trip, TripFilter>(Trip, this.tripService, this.tripValidatorService);
   };
@@ -109,6 +116,7 @@ export class TripsPage implements OnInit, OnDestroy {
   }
 
   confirmAndAddRow(row: TableElement<Trip>) {
+    console.debug("Trying to confirmAndAddRow", row);
     // create
     var valid = false;
     if (row.id<0) {
@@ -139,6 +147,7 @@ export class TripsPage implements OnInit, OnDestroy {
     this.dataSource.createNew();
     this.dirty = true;
     this.resultsLength++;
+    this.selectedRow = null;
   }
 
   editRow(row) {
@@ -176,7 +185,12 @@ export class TripsPage implements OnInit, OnDestroy {
   }
 
   displayReferentialFn(ref?: Referential): string | undefined {
-    return ref ? (ref.label + ' - ' + ref.name) : undefined;
+    return ref && ref.label ? (ref.label + ' - ' + ref.name) : undefined;
+  }
+
+
+  displayVesselFn(ref?: VesselFeatures | any): string | undefined {
+    return ref ? (ref.exteriorMarking || ref.name) : undefined;
   }
 
   /** Whether the number of selected elements matches the total number of rows. */
@@ -203,9 +217,10 @@ export class TripsPage implements OnInit, OnDestroy {
       this.resultsLength--;
     });
     this.selection.clear();
+    this.selectedRow = null;
   }
 
-  onRowClicked(row) {
+  onEditRow(event, row) {
     if (this.selectedRow && this.selectedRow === row) return;
     if (this.selectedRow && this.selectedRow !== row && this.selectedRow.editing) {
       var confirm = this.selectedRow.confirmEditCreate();
@@ -219,6 +234,18 @@ export class TripsPage implements OnInit, OnDestroy {
     }
     this.selectedRow = row;
     this.dirty = true;
+  }
+
+  onOpenRowDetail(event, row) {
+    if (!row.currentData.id || row.editing) return;
+    if (this.dirty) {
+      this.onEditRow(event, row);
+      return;
+    }
+
+    this.router.navigate([row.currentData.id], { 
+      relativeTo: this.route
+    });
   }
 
   openTripModal() {

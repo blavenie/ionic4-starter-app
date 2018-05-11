@@ -16,15 +16,19 @@
     "BTN_SEARCH": "Search",
     "BTN_NEXT": "Next",
     "BTN_BACK": "Back",
-    "BTN_SEND": "Send"
+    "BTN_SEND": "Send",
+    "CREATED_ON": "Created on",
+    "UPDATED_ON": "Last modification on",
+    "RECORDER": "Recorder"
   },
   "MENU": {
     "HOME": "Home",
     "TRIPS": "Trips",
+    "ADMINISTRATION_DIVIDER": "Administration",
     "USERS": "Users",
+    "FOOTER_VERSION_ABOUT": "v{{version}} | About",
     "BTN_ACCOUNT": "Account",
-    "BTN_LOGOUT": "Log out",
-    "FOOTER_VERSION_ABOUT": "v{{version}} | About"
+    "BTN_LOGOUT": "Log out"
   },
   "HOME": {
     "WELCOME": "Welcome to the SUMARiS web site!",
@@ -33,7 +37,7 @@
     "NOT_THIS_ACCOUNT_QUESTION": "You are not <b>{{displayName}}</b>?",
     "BTN_DISCONNECT": "Disconnect this account",
     "BTN_MY_ACCOUNT": "My account"
-  },  
+  },
   "AUTH": {
     "TITLE": "Authentication",
     "BTN_LOGIN": "Log In",
@@ -48,10 +52,31 @@
     "STEP_USER_DETAILS": "user details",
     "CONFIRM_EMAIL": "Email (confirmation)",
     "CONFIRM_PASSWORD": "Password (confirmation)",
+    "CONFIRMED": {
+      "LOADING_TITLE": "Waiting confirmation...",
+      "TITLE": "Registration completed!",
+      "SUCCESS_MESSAGE": "Your email address <b>{{email}}</b> has been validated.<br/>Your registration is now <b>complete</b>!",
+      "LOGIN_HELP": "To login, <b>click below</b>:"
+    },
     "ERROR": {
       "NOT_SAME_EMAIL": "Emails not matched",
       "NOT_SAME_PASSWORD": "Passwords not matched",
       "EMAIL_ALREADY_REGISTERED": "Email already registered"
+    }
+  },
+  "ACCOUNT": {
+    "TITLE": "My account",
+    "EMAIL_NOT_CONFIRMED_LABEL": "The email of this account has not yet validated: <b>check your mailbox</b> and click on the link provided.",
+    "EMAIL_NOT_RECEIVED_QUESTION": "If you did not receive the validation email, <br/>you can <b>request a new mailing</b>:",
+    "BTN_RESEND": "Resend",
+    "USER_DETAILS": {
+      "TITLE": "Profile",
+      "DESCRIPTION": "Here are the registered data about your account:"
+    },
+    "SETTINGS": {
+      "TITLE": "Settings",
+      "DESCRIPTION": "Here are the possible settings for the use of the application:",
+      "LOCALE": "Language"
     }
   },
   "USER": {
@@ -66,6 +91,13 @@
       "PROFILE_USER": "Utilisateur"
     }
   },
+  "USERS": {
+    "TITLE": "Users",
+    "FILTER": {
+      "TITLE": "Search options:",
+      "SEARCH": "Search"
+    }
+  },
   "TRIPS": {
     "TITLE": "Fishing trips",
     "FILTER": {
@@ -76,11 +108,16 @@
   },
   "TRIP": {
     "TITLE": "Fishing trip",
+    "VESSEL": "Vessel",
+    "DEPARTURE": "Departure:",
     "DEPARTURE_DATE_TIME": "Departure date",
     "DEPARTURE_LOCATION": "Departure harbour",
+    "RETURN": "Return:",
     "RETURN_DATE_TIME": "Return date",
     "RETURN_LOCATION": "Return harbour",
     "COMMENTS": "Comments",
+    "TAB_GENERAL": "General informations",
+    "TAB_OPERATIONS": "Operations",
     "NEW": {
       "TITLE": "New fishing trip"
     },
@@ -94,7 +131,18 @@
     "FIELD_TOO_SHORT_WITH_LENGTH": "Value is too short (min {{minLength]] characters).",
     "FIELD_TOO_LONG": "Value is exceeding max length.",
     "FIELD_TOO_LONG_WITH_LENGTH": "Value is too long (max {{maxLength}} characters).",
-    "SPACE_NOT_ALLOW": "Spaces or special caracters not allowed",
-    "SCRYPT_ERROR": "Unable to create account keyrs"
+    "FIELD_MIN": "Minimal value: {{min}}",
+    "FIELD_MAX": "Maximum value: {{max}}",
+    "FIELD_NOT_VALID_EMAIL": "Email address Invalid",
+    "SPACE_NOT_ALLOW": "Spaces or special characters not allowed",
+    "SCRYPT_ERROR": "Unable to create account keys",
+    "UNKNOWN_ACCOUNT_EMAIL": "No account matches this email.",
+    "BAD_PASSWORD": "Incorrect password.",
+    "EMAIL_ALREADY_REGISTERED": "Email already registered",
+    "UNKNOWN_NETWORK_ERROR": "Error communicating with the server.<br/>If the problem persists, please contact your administrator.",
+    "LOAD_ACCOUNT_ERROR": "Erreur de chargement du compte utilisateur.<br/>If the problem persists, please contact your administrator.",
+    "SAVE_ACCOUNT_ERROR": "Error saving your account.<br/>If the problem persists, please contact your administrator.",
+    "SENT_ACCOUNT_CONFIRMATION_EMAIL_FAILED": "Error sending account confirmation email.<br/>If the problem persists, please contact your administrator.",
+    "CONFIRM_ACCOUNT_EMAIL_FAILED": "Error while confirming the email. This account may have already been confirmed?"
   }
 }

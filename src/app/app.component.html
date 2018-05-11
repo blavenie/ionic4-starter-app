@@ -4,9 +4,11 @@
       <ion-toolbar class="user-profile" color="">
         <ion-grid >
           <ion-row>
-            <ion-col col-4 [hidden]="!isLogin || !account?.avatar"  class="fade in">
-              <div class="user-avatar" [ngStyle]="{'background-image':'url('+(account?.avatar||'./assets/img/person.png')+')'}">
-                
+            <ion-col col-4 [hidden]="!account" class="fade in">
+              <div class="user-avatar" 
+                *ngIf="account"
+                [class.primary]="!account?.avatar"
+                [ngStyle]="{'background-image':'url('+(account?.avatar||'./assets/img/person.png')+')'}">
               </div>
             </ion-col>
             <ion-col col [class.align-right]="isLogin">
@@ -14,20 +16,20 @@
             </ion-col>
           </ion-row>
           <ion-row [hidden]="!isLogin" no-padding>
-            <h2 ion-text class="no-margin  bold text-white username">
+            <h4 ion-text full class="no-margin  bold text-white username">
               {{account?.firstName}} {{account?.lastName}}
-            </h2>
-            <span ion-text color="light" >{{account?.email}}</span>
+            </h4>
+            <span ion-text color="light">{{account?.email}}</span>
           </ion-row>
 
           <ion-row no-padding class="other-data" [hidden]="!isLogin"  class="fade in">
-            <ion-col no-padding class="column">
-              <button ion-button icon-left small full color="light" menuClose disabled>
+            <ion-col no-padding>
+              <button ion-button icon-left small full color="light" menuClose [routerLink]="['/account']">
                 <ion-icon name="contact"></ion-icon>
                 <span translate>MENU.BTN_ACCOUNT</span>
               </button>
             </ion-col>
-            <ion-col no-padding class="column">
+            <ion-col no-padding padding-left>
               <button ion-button icon-left small full color="light" menuClose (click)="logout()">
                 <ion-icon name="log-out"></ion-icon>
                 <span translate>MENU.BTN_LOGOUT</span>
@@ -43,10 +45,15 @@
     <ion-content color="dark" [class.has-profile-header]="isLogin" [class.no-profile-header]="!isLogin">
 
       <ion-list class="user-list">
-        <button ion-item menuClose class="text-1x" *ngFor="let menuItem of appMenuItems" routerLink="{{menuItem.path}}">
-          <ion-icon item-left [name]="menuItem.icon" color="primary"></ion-icon>
-          <span ion-text color="primary">{{menuItem.title|translate}}</span>
-        </button>
+        <ng-container  *ngFor="let menuItem of appMenuItems">
+          <button ion-item menuClose class="text-1x" routerLink="{{menuItem.path}}" *ngIf="menuItem.path">
+            <ion-icon item-left [name]="menuItem.icon" color="primary"></ion-icon>
+            <span ion-text color="primary">{{menuItem.title|translate}}</span>
+          </button>
+          <ion-item-divider color="stable" style="background-color: whitesmoke;" *ngIf="!menuItem.path"> 
+              {{menuItem.title|translate}}
+          </ion-item-divider>
+        </ng-container>
       </ion-list>
     </ion-content>
 
@@ -61,6 +68,6 @@
 
   </ion-menu>
 
-  <router-outlet #content main swipeBackEnabled="false"></router-outlet>
+  <router-outlet  #content main swipeBackEnabled="true"></router-outlet>
 
 </ion-split-pane>

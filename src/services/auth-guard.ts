@@ -15,20 +15,20 @@ export class AuthGuard implements CanActivate
   canActivate(  next: ActivatedRouteSnapshot,state: RouterStateSnapshot): Observable<boolean> | Promise<boolean> | boolean
   {
     if (!this.accountService.isLogin()) {
-      console.log("[auth-gard] Access control {"+next.url+"}  login modal...");
+      console.debug("[auth-gard] Need authentication for page /"+next.url.join('/'));
       return new Promise<boolean>((resolve) => {
         let modal = this.modalCtrl.create(AuthModal, {next: next});
         modal.onDidDismiss(() => {
           let res = this.accountService.isLogin();
           if (!res) {
-           console.log("[auth-gard] Unauthorized Access to {" + next.url + "}");
+           console.debug("[auth-gard] Authentication cancelled. Could not access to /" + next.url.join('/'));
           }
           resolve(res);
         });
         return modal.present(); 
       });
     } else {
-      console.log("[auth-gard] Authorized Access for user {" + this.accountService.account.email + "}");
+      console.debug("[auth-gard] Authorized access to /"+next.url.join('/'));
       return true;
     }
   }

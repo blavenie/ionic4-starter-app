@@ -1,7 +1,5 @@
 page-home {
 
-  
-
   .light-bg {
     background-color: rgba(255,255,255,.7);
   }
@@ -22,6 +20,11 @@ page-home {
 
     min-width: 240px;
     z-index: 99;
+
+    button {
+      width: 100%;
+      margin-top:16px;
+    }
   }
 
   .bottom-banner {
@@ -35,6 +38,7 @@ page-home {
 
     img.logo {
       max-height: 50px;
+      margin-left: 8px;
     }
   }
 

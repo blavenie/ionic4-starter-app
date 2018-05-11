@@ -16,6 +16,7 @@ const PersonsQuery = gql`
       email
       pubkey
       avatar
+      statusId
     }
   }
 `;

@@ -1,12 +1,13 @@
 import { Injectable } from "@angular/core";
 import { KeyPair, CryptoService } from "./crypto-service";
 import { Account, Referential } from "./model";
-import { Subject } from "rxjs";
+import { Subject, Observable, Subscription } from "rxjs";
 import gql from "graphql-tag";
 import { TranslateService } from "@ngx-translate/core";
 import {Apollo} from "apollo-angular";
-import {ApolloQueryResult} from "apollo-client";
-import { Observable } from "apollo-link";
+import { DocumentNode } from "graphql";
+import { BaseDataService } from "./data-service";
+import { ErrorCodes } from "./errors";
 
 const base58 = require('../lib/base58')
 
@@ -29,19 +30,11 @@ const PUBKEY_STORAGE_KEY="pubkey"
 const SECKEY_STORAGE_KEY="seckey"
 const ACCOUNT_STORAGE_KEY="account"
 
-const ERROR_CODES = {
-  LOAD_ACCOUNT_ERROR: 1,
-  BAD_PASSWORD: 2,
-  UNKNOWN_ACCOUNT_EMAIL: 3,
-  EMAIL_ALREADY_REGISTERED: 4,
-  UNKNOWN_NETWORK_ERROR: 5
-}
-
 /* ------------------------------------
  * GraphQL queries
  * ------------------------------------*/ 
 // Get account query
-const AccountQuery = gql`
+const AccountQuery: DocumentNode = gql`
   query Account($pubkey: String){
     account(pubkey: $pubkey){
       id
@@ -50,8 +43,15 @@ const AccountQuery = gql`
       email
       pubkey
       avatar
+      statusId
+      updateDate
       settings {
+        id
         locale
+        updateDate
+      }
+      department {
+        id
       }
     }
   }
@@ -64,7 +64,7 @@ export declare type AccountResult = {
 }
 
 // Check email query
-const IsEmailExistsQuery = gql`
+const IsEmailExistsQuery: DocumentNode = gql`
   query IsEmailExists($email: String, $hash: String){
     isEmailExists(email: $email, hash: $hash)
   }
@@ -73,22 +73,45 @@ export declare type IsEmailExistsVariables = {
   email: string;
   hash: string;
 }
-export declare type  IsEmailExistsResult = {
-  isEmailExists: boolean;
-}
 
-// Create account query
-const CreateAccountQuery = gql`
-  mutation createAccount($account:AccountVOInput){
-    createAccount(account: $account){
+// Save (create or update) account mutation
+const SaveAccountMutation: DocumentNode = gql`
+  mutation saveAccount($account:AccountVOInput){
+    saveAccount(account: $account){
       id
       updateDate
+      settings {
+        id
+        updateDate
+      }
     }
   }
 `;
 
+// Sent confirmation email
+const SendConfirmEmailMutation: DocumentNode = gql`
+  mutation sendAccountConfirmationEmail($email:String, $locale:String){
+    sendAccountConfirmationEmail(email: $email, locale: $locale)
+  }
+`;
+
+// Confirm account email
+const ConfirmEmailMutation: DocumentNode = gql`
+  mutation confirmAccountEmail($email:String, $code:String){
+    confirmAccountEmail(email: $email, code: $code)
+  }
+`;
+
+
+// Subscription TEST
+const TestSubscription: DocumentNode = gql`
+  subscription updateTrip($tripId: Int){
+    updateTrip(tripId: $tripId)
+  }
+`;
+
 @Injectable()
-export class AccountService {
+export class AccountService extends BaseDataService {
 
   private data:AccountHolder = {    
     loaded: false,
@@ -107,10 +130,11 @@ export class AccountService {
   }
 
   constructor(
-    private apollo: Apollo,
+    protected apollo: Apollo,
     private translate: TranslateService,
     private cryptoService: CryptoService
   ) {
+    super(apollo);
     this.resetData();
     this.restoreLocally()
       .then((account) => {
@@ -167,16 +191,16 @@ export class AccountService {
         data.account.department.id  =  data.account.department.id || 1; 
 
         this.data.keypair = keypair;
-        return this.createAccount(data.account, keypair); 
+        return this.saveAccount(data.account, keypair); 
       })
-      .then((savedAccount) =>  {
+      .then((account) =>  {
 
         // Default values
-        savedAccount.avatar = savedAccount.avatar || "../assets/img/person.png";
-        this.data.mainProfile = this.getMainProfile(savedAccount.profiles);
+        account.avatar = account.avatar || "../assets/img/person.png";
+        this.data.mainProfile = this.getMainProfile(account.profiles);
         
-        this.data.account = savedAccount;
-        this.data.pubkey = savedAccount.pubkey;
+        this.data.account = account;
+        this.data.pubkey = account.pubkey;
         this.data.loaded = true;
 
         return this.saveLocally();
@@ -196,7 +220,7 @@ export class AccountService {
   public login(data: AuthData): Promise<Account> {
     if (!data.username || !data.username) return Promise.reject("Missing required username por password");
 
-    console.debug("[wallet] Login user {"+ data.username+"}...");
+    console.debug("[account] Trying to login...");
 
     return this.cryptoService.scryptKeypair(data.username, data.password)
       .catch((error) => {
@@ -210,7 +234,7 @@ export class AccountService {
         return this.loadData()
           .catch(err => {
             // If account not found, check if email is valid
-            if (err && err.code == ERROR_CODES.LOAD_ACCOUNT_ERROR) {
+            if (err && err.code == ErrorCodes.LOAD_ACCOUNT_ERROR) {
               return this.isEmailExists(data.username)
                 .catch(otherError => {
                   throw err; // resend the first error
@@ -218,10 +242,10 @@ export class AccountService {
                 .then(isEmailExists => {
                   // Email not exists (no account)
                   if (!isEmailExists) {
-                    throw {code: ERROR_CODES.UNKNOWN_ACCOUNT_EMAIL, message: "ERROR.UNKNOWN_ACCOUNT_EMAIL"};
+                    throw {code: ErrorCodes.UNKNOWN_ACCOUNT_EMAIL, message: "ERROR.UNKNOWN_ACCOUNT_EMAIL"};
                   }
                   // Email exists, so error = 'bad password' 
-                  throw {code: ERROR_CODES.BAD_PASSWORD, message: "ERROR.BAD_PASSWORD"}
+                  throw {code: ErrorCodes.BAD_PASSWORD, message: "ERROR.BAD_PASSWORD"}
                 });
             }
             throw err; // resend the first error
@@ -231,20 +255,33 @@ export class AccountService {
         return this.saveLocally();
       })
       .then(() => {
-        console.debug("[wallet] Sucessfully login");
+        console.debug("[account] Sucessfully authenticated {"+this.data.pubkey.substr(0,6)+"}");
         this.onLogin.next(this.data.account);
         return this.data.account;
       })
       ;
   }
 
+  public refresh(): Promise<Account> {
+    if (!this.data.pubkey) return Promise.reject("User not logged");
+
+    const locale = this.translate.currentLang;
+
+    return this.loadData() 
+      .then(() => {
+        return this.saveLocally();
+      })
+      .then(() => {
+        console.debug("[wallet] Sucessfully login");
+        this.onLogin.next(this.data.account);
+        return this.data.account;
+      });
+  }
 
   loadData(): Promise<Account> {
     if (!this.data.pubkey) return Promise.reject("User not logged");
 
     this.data.loaded = false;
-    console.debug("[wallet] Loading wallet data...");
-    var now = new Date();
 
     return this.loadAccount(this.data.pubkey)
       .then((account) => {
@@ -259,7 +296,6 @@ export class AccountService {
 
         this.data.account = account;
         this.data.loaded = true;
-        console.debug("[wallet] Wallet data loaded in " + (new Date().getTime()-now.getTime()) + "ms");
         return this.data.account;
       })
       .catch((error) => {
@@ -268,7 +304,7 @@ export class AccountService {
 
         console.error(error);
         throw {
-          code: ERROR_CODES.LOAD_ACCOUNT_ERROR,
+          code: ErrorCodes.LOAD_ACCOUNT_ERROR,
           message: 'ERROR.LOAD_ACCOUNT_ERROR'
         };
       });
@@ -279,7 +315,7 @@ export class AccountService {
 
     if (!pubkey) return Promise.resolve(undefined);
 
-    console.debug("[wallet] Restoring user account {"+pubkey+"}'...");
+    console.debug("[account] Restoring account {"+pubkey.substr(0,6)+"}'...");
     return new Promise((resolve) => {
       this.data.pubkey = pubkey;
 
@@ -302,19 +338,49 @@ export class AccountService {
     
   }
 
+  /** 
+  * Save account into the local storage
+  */
   public saveLocally(): Promise<void> {
     if (!this.data.pubkey) return Promise.reject("User not logged");
 
-    console.debug("[wallet] Saving data in local storage...");
+    console.debug("[account] Saving account in local storage...");
 
     return new Promise((resolve) => {
       window.localStorage.setItem(PUBKEY_STORAGE_KEY, this.data.pubkey);
 
       let copy = this.data.account.asObject();
       window.localStorage.setItem(ACCOUNT_STORAGE_KEY,  JSON.stringify(copy));
-      console.debug("[wallet] Data saved in local storage");
+      console.debug("[account] Account saved in local storage");
       resolve();
     });
+  }
+
+  /**
+   * Create or update an user account, to the remote storage
+   * @param account 
+   * @param keyPair 
+   */
+  public saveRemotely(account: Account): Promise<Account> {
+    if (!this.data.pubkey) return Promise.reject("User not logged");
+    if (this.data.pubkey != account.pubkey) return Promise.reject("Not user account");
+
+    return this.saveAccount(account, this.data.keypair)
+      .then(updatedAccount => {
+
+        // Default values
+        account.avatar = account.avatar || "../assets/img/person.png";
+        this.data.mainProfile = this.getMainProfile(account.profiles);
+
+        this.data.account = account;
+        this.data.loaded = true;
+
+        return this.saveLocally();
+      })
+      .then(() => {
+        this.onLogin.next(this.data.account);        
+        return this.data.account;
+      });
   }
 
   public logout(): Promise<void>{
@@ -336,76 +402,68 @@ export class AccountService {
    * Load a account by pubkey
    * @param pubkey 
    */
-  public loadAccount(pubkey: string): Promise<Account> {
+  public loadAccount(pubkey: string): Promise<Account|undefined> {
 
-    this.apollo.getClient().cache.reset();
-    const variables:AccountVariables = {
-      pubkey: pubkey
-    };
-    return new Promise<Account>((resolve, reject) => {
-      let subscription = this.apollo.query<ApolloQueryResult<AccountResult>, AccountVariables>({
-          query: AccountQuery,
-          variables: variables
-        })
-        .catch(err => {
-          if (err && err.networkError) {
-            console.error("[account] " + err.networkError.message);
-            return Observable.of({
-              errors: [{code: ERROR_CODES.UNKNOWN_NETWORK_ERROR, message: "ERROR.UNKNOWN_NETWORK_ERROR"}],
-              data: null
-            });
-          }
-          return Observable.of({errors: [err], data: null});
-        })
-        .subscribe(({data, errors}) => {      
-            if (errors) {
-              reject(errors[0]);
-            }
-            else if (data && data['account']) {
-              const res = new Account();
-              res.fromObject(data['account']);
-              resolve(res);
-            }
-            else {
-              resolve();
-            }
-            subscription.unsubscribe();
-          });
-      });
+    console.debug("[account-service] Loading account {"+pubkey.substring(0,6)+"}");
+    var now = new Date();
+
+    return this.query<{account: any}>({
+      query: AccountQuery,
+      variables: {
+        pubkey: pubkey
+      },
+      error: {code: ErrorCodes.UNKNOWN_NETWORK_ERROR, message: "ERROR.UNKNOWN_NETWORK_ERROR"}
+    })
+    .then(res => {
+      if (res && res.account) {
+        const account = new Account();
+        account.fromObject(res.account);
+        console.debug("[account-service] Account {"+pubkey.substring(0,6)+"} loaded in " + (new Date().getTime()-now.getTime()) + "ms", res);
+        return account;
+      }
+      else {
+        console.warn("[account-service] Account {"+pubkey.substring(0,6)+"} not found !");
+        return undefined;
+      }
+    });
   }
 
   /**
-   * Creating a user account
+   * Create or update an user account
    * @param account 
    * @param keyPair 
    */
-  public createAccount(account: Account, keyPair: KeyPair): Promise<Account> {
-
+  public saveAccount(account: Account, keyPair: KeyPair): Promise<Account> {
     const json = account.asObject();
     json.pubkey = json.pubkey || base58.encode(keyPair.publicKey);
 
-    console.debug("[trip-service] Creating account ", json);
-    return new Promise<Account>((resolve, reject) => {
-      let subscription = this.apollo.mutate({
-        mutation: CreateAccountQuery,
-        variables: {
-          account: json
-        }
-      })
-      .subscribe(({data}) => {
-        let copy = account.clone();
-        let res = data && data['createAccount'];
-        if (res) {
-          copy.id = res.id;
-          copy.updateDate = res.updateDate;
-          resolve(copy);
-        }
-        else {
-          reject("Unable to create account");
-        }
-        subscription.unsubscribe();
-      });
+    console.debug("[account-service] Saving account {"+json.pubkey.substring(0,6)+"}...");
+    let now = new Date
+
+    return this.mutate<{saveAccount: any}>({
+      mutation: SaveAccountMutation, 
+      variables : {
+        account: json
+      },
+      error: {
+        code: ErrorCodes.SAVE_ACCOUNT_ERROR,
+        message: "ERROR.SAVE_ACCOUNT_ERROR"
+      }
+    })
+    .then(res => {
+      let data = res.saveAccount;
+
+      // Copy update properties
+      account.id = data.id;
+      account.updateDate = data.updateDate;
+      account.settings.id = data.settings && data.settings.id;
+      account.settings.updateDate = data.settings && data.settings.updateDate;
+
+      console.debug("[account-service] Account {"+json.pubkey.substring(0,6)+"} saved in " + (new Date().getTime()-now.getTime()) + "ms", account);
+
+      return account;
     });
+
   }
 
   /**
@@ -418,7 +476,7 @@ export class AccountService {
     return this.isEmailExists(email)
       .then(isEmailExists => {      
           if (isEmailExists) {
-            throw {code: ERROR_CODES.EMAIL_ALREADY_REGISTERED, message: "ERROR.EMAIL_ALREADY_REGISTERED"};
+            throw {code: ErrorCodes.EMAIL_ALREADY_REGISTERED, message: "ERROR.EMAIL_ALREADY_REGISTERED"};
           }
         });
   }
@@ -431,30 +489,85 @@ export class AccountService {
 
     console.debug("[wallet] Checking if {"+email+"} exists...");
 
-    this.apollo.getClient().cache.reset();
-    const variables:IsEmailExistsVariables = {
-      email: email,
-      hash: undefined
-    };
-    return new Promise<boolean>((resolve, reject) => {
-      let subscription = this.apollo.query<ApolloQueryResult<IsEmailExistsResult>, IsEmailExistsVariables>({
-          query: IsEmailExistsQuery,
-          variables: variables
-        })
-        .catch(err => {
-          return Observable.of({data: null, errors: [err]});
-        })
-        .subscribe(({data, errors}) => {      
-            if (errors) {
-              reject(errors[0].message);
-            }
-            else {
-              let isEmailExists = data && data['isEmailExists'];
-              resolve(isEmailExists);
-            }
-            subscription.unsubscribe();
-          });
+    return this.query<{isEmailExists: boolean}, IsEmailExistsVariables>({
+        query: IsEmailExistsQuery,
+        variables: {
+          email: email,
+          hash: undefined
+        }
+      })
+      .then(data => {      
+        return data && data.isEmailExists;
       });
+  }
+
+  public sendConfirmationEmail(email: String, locale?: string) : Promise<boolean> {
+
+    locale = locale || this.translate.currentLang;
+    console.debug("[trip-service] Sending confirmation email to {"+email+"} with locale {"+locale+"}...");
+
+    return this.mutate<boolean>({
+      mutation: SendConfirmEmailMutation,
+      variables: {
+        email: email,
+        locale: locale
+      }, 
+      error: {
+        code: ErrorCodes.SENT_CONFIRMATION_EMAIL_FAILED, 
+        message: "ERROR.SENT_ACCOUNT_CONFIRMATION_EMAIL_FAILED"
+      }
+    });
+  }
+
+  public confirmEmail(email: String, code: String) : Promise<boolean> {
+
+    console.debug("[account-service] Sendng confirm request for email {"+email+"} with code {"+code+"}...");
+
+    return this.mutate<{confirmAccountEmail: boolean}>({
+      mutation: ConfirmEmailMutation,
+      variables: {
+        email: email,
+        code: code
+      }, 
+      error: {
+        code: ErrorCodes.CONFIRM_EMAIL_FAILED, 
+        message: "ERROR.CONFIRM_ACCOUNT_EMAIL_FAILED"
+      }
+    })
+    .then(res => res && res.confirmAccountEmail);
+  }
+
+  public listenChanges() : Subscription {
+    if (!this.data.pubkey) return Subscription.EMPTY;
+
+    const self = this;
+
+    return this.apollo.subscribe({
+      query: gql`
+        subscription updateAccount($pubkey: String, $interval: Int){
+          updateAccount(pubkey: $pubkey, interval: $interval) {
+            id
+            updateDate
+          }
+        }`,
+      variables: {
+        pubkey: this.data.pubkey,
+        interval: 10
+      }
+    }).subscribe({
+      next ({data, errors}) {
+        if (data && data.updateAccount) {
+          const updateDate = data.updateAccount.updateDate;
+          if (self.data.account && self.data.account.updateDate !== updateDate) {
+            console.debug("[account] [WS] Account updated at {" + updateDate + "}", data.updateAccount);
+            self.refresh();
+          }
+        }
+      },
+      error(err) {
+        console.log("[account] [WS] Received error:", err);
+      }
+    });
   }
 
   /* -- Protected methods -- */
@@ -467,4 +580,5 @@ export class AccountService {
     // ADMIN => LOCAL_ADMIN  => OBSERVER => VIEWER => USER
     return profiles[0].label;
   }
+
 }

@@ -1,7 +1,7 @@
 import {Component, OnInit, Input, EventEmitter, Output} from '@angular/core';
 import {TripValidatorService} from "../../trips/validator/validators";
 import {FormGroup} from "@angular/forms";
-import {Trip, Referential} from "../../../services/model";
+import {Trip, Referential, VesselFeatures} from "../../../services/model";
 
 
 @Component({
@@ -11,50 +11,67 @@ import {Trip, Referential} from "../../../services/model";
 export class TripForm implements OnInit {
 
   form: FormGroup;
-  onCancel:EventEmitter<any> = new EventEmitter<any>();
   locations: Referential[] = [
     new Referential({id: 1,label: 'XBR',name: 'Brest'}),
-    new Referential({id: 2,label: 'XBL',name: 'Brest'})
+    new Referential({id: 2,label: 'XBL',name: 'Boulogne'})
+  ];
+  vessels: VesselFeatures[] = [
+    new VesselFeatures().fromObject({vesselId: 1, exteriorMarking: 'FRA000851751', name: 'Vessel1'}),
+    new VesselFeatures().fromObject({vesselId: 2, exteriorMarking: 'BEL000152147', name: 'Belgium Oscar'})
   ];
 
-  @Input()
-  data: Trip;
-
+  public get value(): any {
+    return this.form.value;
+  }
+  
   @Output()
-  onSave: EventEmitter<any> = new EventEmitter<any>();
+  onCancel:EventEmitter<any> = new EventEmitter<any>();
+  
+  @Output()
+  onSubmit: EventEmitter<any> = new EventEmitter<any>();
 
   constructor(
     private tripValidatorService: TripValidatorService) {
   }
 
   ngOnInit() {
-    console.log("[trip-form] data:", this.data);
-    this.form = this.tripValidatorService.getFormGroup(this.data);
-    //this.form.setValue({
-    //  departureDateTime: this.data.departureDateTime
-    //});
+    this.form = this.tripValidatorService.getFormGroup();
   }
 
   cancel() {
     this.onCancel.emit();
   }
 
-  onSubmit(event:any, data: any) {
-
-    this.data.departureDateTime = data.departureDateTime;
-    this.data.departureLocation.id = data.departureLocation.id;
-    this.data.departureLocation.label = data.departureLocation.label;
-    this.data.departureLocation.name = data.departureLocation.name;
-    this.data.returnDateTime = data.returnDateTime;
-    this.data.returnLocation.id = data.returnLocation && data.returnLocation.id;
-    this.data.returnLocation.label = data.returnLocation && data.returnLocation.label;
-    this.data.returnLocation.name = data.returnLocation && data.returnLocation.name;
-
-    console.debug("[trip-form] saving data:", this.data);
-    this.onSave.emit(data);
+  doSubmit(event:any, data: any) {
+    if (this.form.invalid) return;    
+    this.onSubmit.emit(data);
   }
 
   displayReferentialFn(ref?: Referential | any): string | undefined {
-    return ref ? ref.name : undefined;
+    return ref ? (ref.label + " - " + ref.name) : undefined;
+  }
+
+  displayVesselFn(ref?: VesselFeatures | any): string | undefined {
+    return ref ? (ref.exteriorMarking + " - " + ref.name) : undefined;
+  }
+  
+
+  public setValue(data: any) {
+    let value = this.getValue(this.form, data);
+    this.form.setValue(value);
+  }
+
+  getValue(form: FormGroup, data: any) {
+    let value = {};
+    form = form || this.form;
+    for (let key in form.controls) {
+      if (form.controls[key] instanceof FormGroup) {
+        value[key] = this.getValue(form.controls[key] as FormGroup, data[key]);
+      }
+      else {
+        value[key] = data[key] || null;
+      }
+    }
+    return value;
   }
 }

@@ -1,5 +1,10 @@
 import {Moment} from "moment/moment";
 
+export const StatusIds = {
+  DISABLE: 0,
+  ENABLE: 1,
+  TEMPORARY: 2
+}
 
 export declare interface Cloneable<T> {
   clone(): T;
@@ -52,6 +57,44 @@ export class Referential extends Entity<Referential>  {
   }
 }
 
+export class VesselFeatures extends Entity<VesselFeatures>  {
+  vesselId: number;
+  name: string;
+  exteriorMarking: string;
+  basePortLocation: Referential;
+
+  constructor() {
+    super();
+    this.basePortLocation = new Referential();
+  }
+
+  clone(): VesselFeatures {
+    const target = new VesselFeatures();
+    this.copy(target);
+    return target;
+  }
+
+  copy(target: VesselFeatures): VesselFeatures {
+    target.fromObject(this);
+    return target;
+  }
+
+  asObject(): any {
+    const target:any = super.asObject();
+    target.basePortLocation = this.basePortLocation && this.basePortLocation.asObject() || undefined;
+    return target;
+  }
+
+  fromObject(source:any): VesselFeatures {
+    super.fromObject(source);
+    this.exteriorMarking = source.exteriorMarking;
+    this.name = source.name;
+    this.vesselId = source.vesselId;
+    source.basePortLocation && this.basePortLocation.fromObject(source.basePortLocation);
+    return this;
+  }
+}
+
 export class Trip extends Entity<Trip> {
   departureDateTime: Date | Moment;
   returnDateTime: Date | Moment;
@@ -60,15 +103,14 @@ export class Trip extends Entity<Trip> {
   departureLocation: Referential;
   returnLocation: Referential;
   recorderDepartment: Referential;
-  vessel: Referential;
-  vesselId: number;
+  vesselFeatures: VesselFeatures;
 
   constructor() {
     super();
     this.departureLocation = new Referential();
     this.returnLocation = new Referential();
     this.recorderDepartment = new Referential();
-    this.vessel = new Referential();
+    this.vesselFeatures = new VesselFeatures();
     this.dirty = false;
   }
 
@@ -77,8 +119,12 @@ export class Trip extends Entity<Trip> {
     res.departureLocation = this.departureLocation && this.departureLocation.clone() || undefined;
     res.returnLocation = this.returnLocation && this.returnLocation.clone() || undefined;
     res.recorderDepartment = this.recorderDepartment && this.recorderDepartment.clone() || undefined;
-    res.vessel = this.vessel && this.vessel.clone() || undefined;
+    res.vesselFeatures = this.vesselFeatures && this.vesselFeatures.clone() || undefined;
     return res;
+  }
+
+  copy(target: Trip) {
+    target.fromObject(this);
   }
 
   asObject(): any {
@@ -88,7 +134,7 @@ export class Trip extends Entity<Trip> {
     target.departureLocation = this.departureLocation && this.departureLocation.asObject() || undefined;
     target.returnLocation = this.returnLocation && this.returnLocation.asObject() || undefined;
     target.recorderDepartment = this.recorderDepartment && this.recorderDepartment.asObject() || undefined;
-    target.vessel = this.vessel && this.vessel.asObject() || undefined;
+    target.vesselFeatures = this.vesselFeatures && this.vesselFeatures.asObject() || undefined;
     return target;
   }
 
@@ -101,8 +147,7 @@ export class Trip extends Entity<Trip> {
     source.departureLocation && this.departureLocation.fromObject(source.departureLocation);
     source.returnLocation && this.returnLocation.fromObject(source.returnLocation);
     source.recorderDepartment && this.recorderDepartment.fromObject(source.recorderDepartment);
-    source.vessel && this.vessel.fromObject(source.vessel);
-    this.vesselId = source.vesselId;
+    source.vesselFeatures && this.vesselFeatures.fromObject(source.vesselFeatures);
   }
 }
 
@@ -113,6 +158,7 @@ export class Person extends Entity<Person> implements Cloneable<Person> {
   pubkey: string;
   avatar: string;
   creationDate: Date | Moment;
+  statusId: number;
   department: Referential;
   profiles: Referential[];
 
@@ -150,6 +196,7 @@ export class Person extends Entity<Person> implements Cloneable<Person> {
     this.creationDate = source.creationDate;
     this.pubkey = source.pubkey;
     this.avatar = source.avatar;
+    this.statusId = source.statusId;
     source.department && this.department.fromObject(source.department);
     this.profiles = source.profiles && source.profiles.map(p => {
       const res = new Referential();
@@ -181,7 +228,9 @@ export class UserSettings extends Entity<UserSettings> implements Cloneable<User
   }
 }
 
-
+/** 
+ * An user account
+ */
 export class Account extends Person {
   settings: UserSettings;
 
@@ -192,13 +241,13 @@ export class Account extends Person {
 
   clone(): Account {
     const target = new Account();
-    super.copy(target)
+    super.copy(target);
     return target;
   }
 
   copy(target: Account): Account {
     super.copy(target);
-    target.settings = this.settings.clone();
+    target.settings = this.settings && this.settings.clone() || undefined;
     return target;
   }
 

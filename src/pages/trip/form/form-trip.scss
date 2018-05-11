@@ -1,16 +1,8 @@
 form-trip {
 
-    .form-container {
-        display: flex;
-        flex-direction: column;
-    }
-    
-    .form-container > * {
+    mat-form-field {
         width: 100%;
     }
+
     
-    .item-md.item-block .item-inner {
-        padding: 0px;
-        border: 0px !important;
-    }
 }

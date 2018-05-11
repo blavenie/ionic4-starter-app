@@ -1,0 +1,130 @@
+<app-toolbar  [title]="'ACCOUNT.TITLE'|translate" color="primary" 
+  [hasValidate]="form.dirty && !saving"
+  (onValidate)="doSave($event, form.value)"
+  >
+</app-toolbar>
+
+<ion-content>
+
+  <p ion-text color="danger" *ngIf="error" [innerHTML]="error|translate"></p>
+
+  <form [formGroup]="form" novalidate (ngSubmit)="doSave($event, form.value)">
+
+    <mat-tab-group>
+
+      <!-- TAB: user details --> 
+      <mat-tab label="{{'ACCOUNT.USER_DETAILS.TITLE'|translate}}">
+        <ng-template mat-tab-label>
+          <ion-icon name="contact"></ion-icon>
+          <span>{{'ACCOUNT.USER_DETAILS.TITLE'|translate}}</span>
+        </ng-template>
+          
+        <p [innerHTML]="'ACCOUNT.USER_DETAILS.DESCRIPTION'|translate"></p>
+      
+
+
+          <!--h1>Identité</h1-->
+
+          <!-- Email -->
+          <mat-form-field>
+            <input matInput
+                  [appAutofocus]="true"
+                  [autofocusDelay]="500"
+                  [placeholder]="'USER.EMAIL'|translate"
+                  formControlName="email"
+                  autocomplete="section-red email">
+            <mat-error *ngIf="form.controls.email.hasError('required') && form.controls.email.dirty" translate>ERROR.FIELD_REQUIRED</mat-error>
+            <mat-error *ngIf="form.controls.email.hasError('email') && form.controls.email.dirty">
+                <span>{{'ERROR.FIELD_NOT_VALID_EMAIL' | translate }}</span>
+            </mat-error>
+          </mat-form-field>
+
+          <p ion-text padding-bottom *ngIf="email.notConfirmed">
+            <ion-icon name="alert" color="danger"></ion-icon>
+            <span ion-text color="danger" [innerHTML]="'ACCOUNT.EMAIL_NOT_CONFIRMED_LABEL'|translate"></span><br/>
+            <br/>
+            <ion-row no-padding style="height: 51px;">
+              <ion-col col-8 style="text-align: right;">
+                <span [innerHTML]="'ACCOUNT.EMAIL_NOT_RECEIVED_QUESTION'|translate"></span>
+              </ion-col>
+              <ion-col>
+                <button mat-raised-button full color="primary" type="button"           
+                  [disabled]="email.sending"
+                  (click)="sendConfirmationEmail($event)">
+                  {{'ACCOUNT.BTN_RESEND'|translate}}          
+                </button>       
+              </ion-col>
+              <ion-col col-1>
+                  <ion-spinner no-padding *ngIf="email.sending"></ion-spinner>
+                </ion-col>
+            </ion-row> 
+          
+            <span *ngIf="email.error && !email.sending" [innerHTML]="email.error|translate"></span>
+          </p>
+
+          <!-- Last name -->
+          <mat-form-field>
+              <input matInput
+                    [placeholder]="'USER.LAST_NAME'|translate"
+                    formControlName="lastName"
+                    autocomplete="section-blue family-name"
+                    required>
+              <mat-error *ngIf="form.controls.lastName.hasError('required') && form.controls.lastName.dirty" translate>ERROR.FIELD_REQUIRED</mat-error>
+              <mat-error *ngIf="form.controls.lastName.hasError('minlength') && form.controls.lastName.dirty">
+                  <span>{{'ERROR.FIELD_TOO_SHORT_WITH_LENGTH' | translate: {minLength: 2} }}</span>
+              </mat-error>
+            </mat-form-field>
+          
+            <!-- First name -->
+            <mat-form-field>
+              <input matInput
+                    [placeholder]="'USER.FIRST_NAME'|translate"
+                    formControlName="firstName"
+                    autocomplete="section-blue given-name"
+                    required>
+              <mat-error *ngIf="form.controls.firstName.hasError('required') && form.controls.firstName.dirty" translate>ERROR.FIELD_REQUIRED</mat-error>
+              <mat-error *ngIf="form.controls.firstName.hasError('minlength') && form.controls.firstName.dirty">
+                  <span>{{'ERROR.FIELD_TOO_SHORT_WITH_LENGTH' | translate: {minLength: 2} }}</span>
+              </mat-error>
+            </mat-form-field>
+
+           
+      </mat-tab>
+
+      <!-- TAB: settings --> 
+      <mat-tab label="{{'ACCOUNT.SETTINGS.TITLE'|translate}}" formGroupName="settings">
+        <ng-template mat-tab-label>
+          <ion-icon name="hammer"></ion-icon>
+          <span>{{'ACCOUNT.SETTINGS.TITLE'|translate}}</span>
+        </ng-template>
+
+        <p [innerHTML]="'ACCOUNT.SETTINGS.DESCRIPTION'|translate"></p>     
+    
+        <mat-form-field>
+            <mat-select 
+              [placeholder]="'ACCOUNT.SETTINGS.LOCALE'|translate" 
+              formControlName="locale"
+              required>
+              <mat-option *ngFor="let locale of locales" [value]="locale">
+                {{localeMap[locale]}}
+              </mat-option>
+            </mat-select>  
+            <mat-error *ngIf="form.controls.settings.controls.locale.hasError('required') && form.controls.settings.controls.locale.dirty" translate>ERROR.FIELD_REQUIRED</mat-error>        
+          </mat-form-field>
+      </mat-tab>
+    </mat-tab-group> 
+
+     <!-- Buttons -->
+     <ion-buttons left start class="hidden-xs hidden-sm">
+        <button mat-raised-button *ngIf="form.dirty" type="button" (click)="cancel()" >
+            <ion-icon name="md-close"></ion-icon>
+            <span translate>COMMON.BTN_CANCEL</span>
+          </button>
+          <button mat-raised-button color="primary" *ngIf="form.dirty" [disabled]="saving">
+            <ion-icon name="md-checkmark"></ion-icon>
+            <span translate>COMMON.BTN_SAVE</span>
+          </button>
+    </ion-buttons>
+
+  </form>
+</ion-content>
